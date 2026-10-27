@@ -41,7 +41,7 @@ const POOLS = {
     open: [
       c => `${c.age ? `${c.age} yosh.` : 'Tug‘ilgan kun.'} ${c.name}, bugun kun sizning nomingizda.`,
       c => `${c.name}, tug‘ilgan kuningiz bilan.${c.age ? ` ${c.age} — yaxshi raqam.` : ''}`,
-      c => `Bugun ${c.name} tug‘ilgan kun${c.age ? `, ${c.age} yosh` : ''} — shuning uchun bu sahifa bor.`,
+      c => `Bugun ${c.name}ning tug‘ilgan kuni${c.age ? `, ${c.age} yosh` : ''} — shuning uchun bu sahifa bor.`,
     ],
     withDetails: [
       c => `Siz haqingizda shuni aytdilar: ${c.details}. Shunga o‘xshagan narsalar esda qoladi.`,
