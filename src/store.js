@@ -117,3 +117,13 @@ export function checkAndCountQuota(userKey) {
   writeJsonAtomic(ratePath, current);
   return { ok: true, remaining: config.ratePerUserPerDay - current.users[userKey] };
 }
+
+/** Gives back one counted attempt when the card it was counted for failed. */
+export function refundQuota(userKey) {
+  const day = today();
+  const state = readJson(ratePath, null);
+  if (!state || state.day !== day) return;
+  if (state.users[userKey] > 0) state.users[userKey] -= 1;
+  if (state.total > 0) state.total -= 1;
+  writeJsonAtomic(ratePath, state);
+}

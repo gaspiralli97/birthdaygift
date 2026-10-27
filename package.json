@@ -7,7 +7,6 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "start": "node src/server.js",
-    "bot": "node src/bot.js",
     "dev": "node --watch src/server.js"
   }
 }

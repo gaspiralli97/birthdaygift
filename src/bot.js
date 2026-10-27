@@ -3,7 +3,7 @@
 // webhook certificate — only the card page is reachable from outside.
 
 import { config } from './config.js';
-import { saveCard, checkAndCountQuota } from './store.js';
+import { saveCard, checkAndCountQuota, refundQuota } from './store.js';
 import { writeLetter, normalizeInput, LANGUAGES } from './ai.js';
 
 const API = token => `https://api.telegram.org/bot${token}`;
@@ -44,6 +44,7 @@ const BOT = {
     badAge: 'Raqam yozing, masalan <code>30</code>. Yoki /skip',
     limitUser: n => `Kunlik chegara tugadi — kuniga ${n} karta. Ertaga qayta urinib ko‘ring.`,
     limitGlobal: 'Bugun tizim bandligi chegarasiga yetdi. Ertaga qayta urinib ko‘ring.',
+    failed: 'Xatolik yuz berdi, karta saqlanmadi. Birozdan keyin qayta urinib ko‘ring: /start',
     cancelled: 'Bekor qilindi. Qaytadan boshlash: /start',
     unknown: 'Boshlash uchun /start yuboring.',
     rels: { friend: 'Do‘stim', classmate: 'Sinfdoshim', colleague: 'Hamkasbim', family: 'Qarindoshim', other: 'Boshqa' },
@@ -65,6 +66,7 @@ const BOT = {
     badAge: 'Type a number, e.g. <code>30</code>. Or /skip',
     limitUser: n => `Daily limit reached — ${n} cards a day. Try again tomorrow.`,
     limitGlobal: 'The service hit its daily cap. Try again tomorrow.',
+    failed: 'Something went wrong and the card was not saved. Try again in a moment: /start',
     cancelled: 'Cancelled. Start again with /start',
     unknown: 'Send /start to begin.',
     rels: { friend: 'Friend', classmate: 'Classmate', colleague: 'Colleague', family: 'Family', other: 'Other' },
@@ -86,6 +88,7 @@ const BOT = {
     badAge: '숫자를 입력해 주세요. 예: <code>30</code>. 또는 /skip',
     limitUser: n => `일일 한도에 도달했습니다 — 하루 ${n}장. 내일 다시 시도해 주세요.`,
     limitGlobal: '오늘 서비스 한도에 도달했습니다. 내일 다시 시도해 주세요.',
+    failed: '문제가 발생해 카드가 저장되지 않았습니다. 잠시 후 다시 시도해 주세요: /start',
     cancelled: '취소되었습니다. /start 로 다시 시작하세요.',
     unknown: '/start 를 보내 시작하세요.',
     rels: { friend: '친구', classmate: '동창', colleague: '동료', family: '가족', other: '기타' },
@@ -107,6 +110,7 @@ const BOT = {
     badAge: 'Напиши число, например <code>30</code>. Или /skip',
     limitUser: n => `Дневной лимит исчерпан — ${n} открыток в день. Попробуй завтра.`,
     limitGlobal: 'Сервис достиг дневного лимита. Попробуй завтра.',
+    failed: 'Что-то пошло не так, открытка не сохранилась. Попробуй чуть позже: /start',
     cancelled: 'Отменено. Начать заново: /start',
     unknown: 'Отправь /start, чтобы начать.',
     rels: { friend: 'Друг', classmate: 'Одноклассник', colleague: 'Коллега', family: 'Родственник', other: 'Другое' },
@@ -178,10 +182,22 @@ async function finish(chatId, userId, session) {
 
   await send(chatId, s.working);
 
-  const card = normalizeInput(session.data);
-  const { paragraphs, source } = await writeLetter(card);
-  const saved = saveCard({ ...card, paragraphs, source });
-  const url = `${config.publicUrl}/c/${saved.id}`;
+  let url;
+  try {
+    const card = normalizeInput(session.data);
+    const { paragraphs, source } = await writeLetter(card);
+    const saved = saveCard({ ...card, paragraphs, source });
+    url = `${config.publicUrl}/c/${saved.id}`;
+  } catch (error) {
+    // Storage is the only thing left that can fail here - writeLetter already
+    // falls back to the template. Refund the attempt so a disk problem does not
+    // also eat the user's daily allowance.
+    refundQuota(`tg:${userId}`);
+    sessions.delete(chatId);
+    console.error('[bot] card creation failed:', error?.message || error);
+    await send(chatId, s.failed);
+    return;
+  }
 
   sessions.delete(chatId);
   await send(chatId, `${s.done}\n\n${url}\n\n<i>${s.expiry(config.ttlDays)}</i>`, {
@@ -219,8 +235,9 @@ async function onText(message) {
 
   switch (session.step) {
     case 'name':
-      if (!skipped && text.replace(/\s/g, '').length < 2) return void send(chatId, s.badName);
-      session.data.name = skipped ? '—' : text;
+      // No /skip here: a card has to be addressed to somebody.
+      if (skipped || text.replace(/\s/g, '').length < 2) return void send(chatId, s.badName);
+      session.data.name = text;
       session.step = 'age';
       return void send(chatId, s.askAge);
 

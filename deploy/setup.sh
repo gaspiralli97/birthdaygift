@@ -64,9 +64,22 @@ ENVEOF
 fi
 
 say "Firewall (local iptables; the OCI security list must allow 80/443 too)"
+# The chain ends in a catch-all REJECT, so the ACCEPTs have to go *before* it.
+# Appending, or inserting at a fixed index, silently puts them after the REJECT
+# where they never match.
+reject_pos() {
+  iptables -L INPUT --line-numbers -n |
+    awk '$2 == "REJECT" || $2 == "DROP" { print $1; exit }'
+}
 for port in 80 443; do
-  iptables -C INPUT -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT 2>/dev/null ||
-    iptables -I INPUT 6 -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT
+  if ! iptables -C INPUT -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT 2>/dev/null; then
+    pos=$(reject_pos)
+    if [[ -n $pos ]]; then
+      iptables -I INPUT "$pos" -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT
+    else
+      iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT
+    fi
+  fi
 done
 netfilter-persistent save >/dev/null
 
