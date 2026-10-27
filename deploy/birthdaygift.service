@@ -1,0 +1,35 @@
+[Unit]
+Description=birthdaygift - birthday card bot and card pages
+Documentation=https://github.com/gaspiralli97/birthdaygift
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=birthdaygift
+Group=birthdaygift
+WorkingDirectory=/opt/birthdaygift
+EnvironmentFile=/etc/birthdaygift/env
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=3
+
+# The process only ever needs to read its code and write its data directory,
+# and it binds a high port on loopback, so it can give up everything else.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/birthdaygift
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryMax=512M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

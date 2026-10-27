@@ -1,0 +1,13 @@
+{
+  "name": "birthdaygift",
+  "version": "1.0.0",
+  "description": "Generate a personal, animated birthday card page from a few details. Link expires after 5 days.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "bot": "node src/bot.js",
+    "dev": "node --watch src/server.js"
+  }
+}
