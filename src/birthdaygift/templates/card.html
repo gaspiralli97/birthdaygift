@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% set s = strings.card %}
+
+{% block title %}{{ s.happy }} {{ card.name }}{% endblock %}
+
+{% block head %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ s.happy }} {{ card.name }}">
+  <meta property="og:description" content="{{ s.hint }}">
+  <meta property="og:url" content="{{ card_url }}">
+  <meta property="og:image" content="{{ card_url }}/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+
+{% block body %}
+<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<main
+  data-candles="{{ candles }}"
+  data-stars="{{ '1' if theme.stars else '0' }}"
+  data-confetti="{{ theme.confetti | join(',') }}"
+  data-lit-label="{{ candles }} {{ s.lit_label }}"
+  data-out-label="{{ candles }} {{ s.out_label }}"
+  data-blow-label="{{ s.blow }}"
+  data-relight-label="{{ s.relight }}"
+  data-hint="{{ s.hint }}"
+  data-wished="{{ s.wished }}">
+
+  <div class="eyebrow">{{ s.eyebrow }}</div>
+
+  {% if card.age %}
+    <p class="age" aria-label="{{ card.age }}">{{ card.age }}</p>
+  {% endif %}
+
+  <h1>{{ s.happy }}<br><em>{{ card.name }}</em></h1>
+
+  <div class="candles" id="candles" aria-label="{{ candles }} {{ s.lit_label }}"></div>
+  <button class="blow" id="blow" type="button">{{ s.blow }}</button>
+  <div class="hint" id="hint">{{ s.hint }}</div>
+
+  <article class="letter">
+    {% for paragraph in card.paragraphs %}
+      <p>{{ paragraph }}</p>
+    {% endfor %}
+    {% if card.from_name %}
+      <p class="sign">{{ s.from_line.format(name=card.from_name) }}</p>
+    {% endif %}
+  </article>
+
+  {% if card.age %}
+    <section class="ledger" aria-label="{{ s.eyebrow }}">
+      <div><b>{{ card.age }}</b><span>{{ s.years }}</span></div>
+      <div><b>{{ (card.age * 12) | thousands }}</b><span>{{ s.months }}</span></div>
+      <div><b>{{ card.age | lived_days | thousands }}</b><span>{{ s.days }}</span></div>
+    </section>
+
+    {% set factors = card.age | prime_factors %}
+    {% if factors %}
+      <div class="math">
+        <div class="eyebrow">{{ s.math_title }}</div>
+        <p class="eq">{{ card.age }} = {{ factors | join(' × ') }}</p>
+        <p>{{ s.prime_one if factors | length == 1 else s.prime_many }}</p>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <p class="note">
+    {{ s.expires_in.format(days=days_left) }}<br>
+    {% if card.views > 1 %}{{ s.views.format(count=card.views) }}<br>{% endif %}
+    <a href="/">{{ strings.expired.make_one }}</a>
+  </p>
+</main>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', path='/js/card.js') }}" defer></script>
+{% endblock %}

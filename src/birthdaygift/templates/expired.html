@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% set s = strings.expired %}
+
+{% block title %}{{ s.title }}{% endblock %}
+
+{% block body %}
+<main>
+  <div class="eyebrow">{{ strings.card.eyebrow }}</div>
+  <h1>{{ s.title }}</h1>
+  <article class="letter"><p>{{ s.body }}</p></article>
+  <p class="note"><a href="/">{{ s.make_one }}</a></p>
+</main>
+{% endblock %}
