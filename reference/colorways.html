@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="uz" data-way="qora">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rang tanlash — birthdaygift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* A plain custom property is just a string: swapping it repaints instantly and
+   nothing can tween it. Registering each one as <color> makes it a real
+   animatable value, so one transition on :root moves the entire palette -
+   background, type, candles, buttons, borders - as a single crossfade. */
+@property --night      { syntax:'<color>'; inherits:true; initial-value:#0c0c0c }
+@property --night-2    { syntax:'<color>'; inherits:true; initial-value:#1b1b1b }
+@property --accent     { syntax:'<color>'; inherits:true; initial-value:#f2d9a0 }
+@property --accent-soft{ syntax:'<color>'; inherits:true; initial-value:#e3c08d }
+@property --accent-lift{ syntax:'<color>'; inherits:true; initial-value:#fdf6e6 }
+@property --paper      { syntax:'<color>'; inherits:true; initial-value:#f2e5c6 }
+@property --muted      { syntax:'<color>'; inherits:true; initial-value:#8a8276 }
+@property --flame      { syntax:'<color>'; inherits:true; initial-value:#f2d9a0 }
+
+:root{
+  --ease:cubic-bezier(.4,0,.2,1);
+  transition:
+    --night .55s var(--ease), --night-2 .55s var(--ease),
+    --accent .55s var(--ease), --accent-soft .55s var(--ease),
+    --accent-lift .55s var(--ease), --paper .55s var(--ease),
+    --muted .55s var(--ease), --flame .55s var(--ease);
+}
+@media (prefers-reduced-motion:reduce){ :root{transition:none} }
+
+/* ===== the three colourways. Only these tokens change. ===== */
+/* Lifted from the Baginy storefront: near-black, burgundy and champagne are
+   that brand's own three colours, so these are sampled rather than invented. */
+[data-way="qora"]{
+  --night:#0c0c0c; --night-2:#1b1b1b;
+  --accent:#f2d9a0; --accent-soft:#e3c08d; --accent-lift:#fdf6e6;
+  --paper:#f2e5c6; --muted:#8a8276; --flame:#f2d9a0;
+  --confetti:#f2d9a0,#f2e5c6,#e3c08d,#75162d,#ffffff;
+}
+[data-way="vino"]{
+  --night:#3a0a16; --night-2:#75162d;
+  --accent:#f2d9a0; --accent-soft:#e3c08d; --accent-lift:#fdf6e6;
+  --paper:#f7ece0; --muted:#c0a2a8; --flame:#f2d9a0;
+  --confetti:#f2d9a0,#f7ece0,#e3c08d,#5c1024,#ffffff;
+}
+[data-way="qaymoq"]{
+  --night:#f2e5c6; --night-2:#faf3e4;
+  --accent:#75162d; --accent-soft:#5c1024; --accent-lift:#a8384f;
+  --paper:#0c0c0c; --muted:#6b5d47; --flame:#c07d1e;
+  --confetti:#75162d,#0c0c0c,#e3c08d,#f2d9a0,#8a8276;
+}
+
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0}
+body{
+  background:radial-gradient(120% 80% at 50% 0%,var(--night-2) 0%,var(--night) 60%) fixed,var(--night);
+  color:var(--paper);
+  font-family:"Instrument Serif",Georgia,"Times New Roman",serif;
+  padding-inline:max(16px,env(safe-area-inset-left,0px));
+  padding-block:0 56px;overflow-x:hidden;
+}
+#sky,#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#sky{z-index:0}#confetti{z-index:5}
+
+/* ===== colourway switcher ===== */
+.ways{
+  position:sticky;top:0;z-index:20;display:flex;gap:8px;align-items:center;
+  flex-wrap:wrap;padding:12px 16px;margin-bottom:28px;
+  background:color-mix(in srgb,var(--night) 86%,transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 18%,transparent);
+  font-family:"DM Mono",ui-monospace,Menlo,monospace;font-size:12px;
+}
+.ways span{color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
+.ways button{
+  font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  background:transparent;color:var(--muted);
+  border:1px solid color-mix(in srgb,var(--accent) 26%,transparent);
+  border-radius:999px;padding:7px 14px;transition:.18s;
+}
+.ways button:hover{color:var(--paper)}
+.ways button[aria-pressed="true"]{background:var(--accent);color:var(--night);border-color:var(--accent)}
+.ways .chip{width:11px;height:11px;border-radius:50%;display:inline-block}
+.ways button:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+
+main{
+  position:relative;z-index:1;max-width:620px;margin:0 auto;
+  display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center;
+}
+.eyebrow{font-family:"DM Mono",ui-monospace,Menlo,monospace;font-size:12px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+.age{
+  font-family:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;font-weight:900;
+  font-size:clamp(150px,42vw,260px);line-height:.8;letter-spacing:-.02em;margin:0;
+  background:linear-gradient(180deg,var(--accent-lift) 0%,var(--accent) 55%,var(--accent-soft) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 30px color-mix(in srgb,var(--accent) 25%,transparent));
+}
+h1{font-weight:400;font-size:clamp(34px,8vw,52px);line-height:1.05;margin:0;text-wrap:balance}
+h1 em{color:var(--accent);font-style:normal}
+
+.candles{display:grid;grid-template-columns:repeat(10,1fr);gap:14px 10px;
+  width:100%;max-width:420px;padding:8px 4px 0}
+.candle{position:relative;height:54px;display:flex;justify-content:center;align-items:flex-end}
+.candle .stick{width:8px;height:30px;border-radius:2px;
+  background:repeating-linear-gradient(135deg,var(--paper) 0 5px,var(--accent) 5px 9px)}
+.candle .flame{position:absolute;bottom:31px;left:50%;width:10px;height:18px;margin-left:-5px;
+  border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%,color-mix(in srgb,var(--flame) 55%,var(--accent-lift)) 0 25%,
+    var(--flame) 55%,transparent 75%);
+  box-shadow:0 0 14px 4px color-mix(in srgb,var(--flame) 45%,transparent);
+  transform-origin:50% 100%;animation:flicker 1.6s ease-in-out infinite alternate;
+  transition:opacity .35s ease,transform .35s ease}
+.candle:nth-child(3n) .flame{animation-duration:1.2s}
+.candle:nth-child(4n) .flame{animation-duration:2s;animation-delay:-.6s}
+.candle .smoke{position:absolute;bottom:32px;left:50%;width:6px;height:6px;margin-left:-3px;
+  border-radius:50%;background:color-mix(in srgb,var(--muted) 60%,transparent);opacity:0}
+.out .flame{opacity:0;transform:scale(.2) translateY(6px)}
+.out .smoke{animation:smoke 1.4s ease-out forwards}
+@keyframes flicker{0%{transform:rotate(-3deg) scaleY(1)}50%{transform:rotate(2deg) scaleY(1.08)}
+  100%{transform:rotate(-1deg) scaleY(.94)}}
+@keyframes smoke{0%{opacity:.7;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(6px,-36px) scale(3)}}
+
+.blow{font-family:"DM Mono",ui-monospace,Menlo,monospace;font-size:14px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--night);background:var(--accent);
+  border:0;border-radius:999px;padding:15px 28px;cursor:pointer;
+  box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 25%,transparent);
+  transition:transform .15s ease,box-shadow .15s ease}
+.blow:hover{transform:translateY(-2px);box-shadow:0 14px 34px color-mix(in srgb,var(--accent) 35%,transparent)}
+.blow:focus-visible{outline:2px solid var(--paper);outline-offset:4px}
+.hint{font-family:"DM Mono",ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);margin-top:-14px}
+
+.letter{width:100%;text-align:left;background:color-mix(in srgb,var(--paper) 4%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:6px;
+  padding:28px clamp(20px,6vw,40px);font-size:21px;line-height:1.5;
+  display:flex;flex-direction:column;gap:16px}
+.letter p{margin:0;max-width:60ch}
+.letter .sign{font-style:italic;color:var(--accent);text-align:right}
+
+.ledger{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;
+  background:color-mix(in srgb,var(--accent) 22%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+  border-radius:6px;overflow:hidden}
+.ledger div{background:var(--night);padding:16px 8px;display:flex;flex-direction:column;gap:4px}
+.ledger b{font-family:"Big Shoulders Display",sans-serif;font-weight:700;
+  font-size:clamp(26px,7vw,36px);color:var(--paper);font-variant-numeric:tabular-nums;line-height:1}
+.ledger span{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted)}
+
+.math{display:flex;flex-direction:column;gap:10px;align-items:center}
+.math p{margin:0;font-size:20px;color:var(--muted);max-width:40ch;text-wrap:balance}
+.math .eq{font-family:"Big Shoulders Display",sans-serif;font-weight:700;
+  font-size:clamp(40px,11vw,60px);color:var(--accent);letter-spacing:.02em}
+.note{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted);line-height:1.7}
+.note a{color:var(--accent)}
+@media (max-width:420px){.candles{gap:10px 6px}.letter{font-size:19px}}
+@media (prefers-reduced-motion:reduce){.candle .flame{animation:none}}
+</style>
+</head>
+<body>
+<nav class="ways">
+  <span>Rang</span>
+  <button data-set="qora" aria-pressed="true"><i class="chip" style="background:#f2d9a0"></i>Qora</button>
+  <button data-set="vino" aria-pressed="false"><i class="chip" style="background:#75162d"></i>Vino</button>
+  <button data-set="qaymoq" aria-pressed="false"><i class="chip" style="background:#f2e5c6"></i>Qaymoq</button>
+</nav>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<main>
+  <div class="eyebrow">Tug‘ilgan kun tabrigi</div>
+  <p class="age" aria-label="30">30</p>
+  <h1>Tug‘ilgan kuningiz bilan,<br><em>Sahobiddin</em></h1>
+
+  <div class="candles" id="candles" aria-label="30 ta yoqilgan sham"></div>
+  <button class="blow" id="blow" type="button">Shamlarni puflash</button>
+  <div class="hint" id="hint">Avval tilak tilang. Ovozni yoqing 🔊</div>
+
+  <article class="letter">
+    <p>Bugun Sahobiddinning tug‘ilgan kuni, 30 yosh — shuning uchun bu sahifa bor.</p>
+    <p>Siz haqingizda shuni aytdilar: litseyda olimpiada masalalarini yechardi, hozir Germaniyada. Shunga o‘xshagan narsalar esda qoladi.</p>
+    <p>Sog‘lik, xotirjamlik va o‘zingizga yoqadigan ish tilayman. Qolgani keladi.</p>
+    <p class="sign">Tabrik: Ismoil</p>
+  </article>
+
+  <section class="ledger">
+    <div><b>30</b><span>yil</span></div>
+    <div><b>360</b><span>oy</span></div>
+    <div><b>10,957</b><span>kun</span></div>
+  </section>
+
+  <div class="math">
+    <div class="eyebrow">Bir kichik matematika</div>
+    <p class="eq">30 = 2 × 3 × 5</p>
+    <p>Tub ko‘paytuvchilarga ajratilgani.</p>
+  </div>
+
+  <p class="note">Bu havola 5 kundan keyin o‘chadi.<br><a href="#">O‘zingiz ham yarating</a></p>
+</main>
+
+<script>
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* stars */
+const sky=document.getElementById('sky'),sctx=sky.getContext('2d');let stars=[];
+function sizeSky(){const d=devicePixelRatio||1;sky.width=innerWidth*d;sky.height=innerHeight*d;
+  sctx.setTransform(d,0,0,d,0,0);stars=Array.from({length:Math.round(innerWidth*innerHeight/9000)},()=>
+    ({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.2+.2,p:Math.random()*6.28}))}
+const lumOf=rgb=>(.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2])/255;
+function drawSky(t){const c=css('--paper').replace('#','');
+  const rgb=[0,2,4].map(i=>parseInt(c.substr(i,2),16));
+  /* On the cream colourway the "stars" are dark on light, which at full
+     strength reads as dirt rather than sky; damp them to a paper grain. */
+  const k=lumOf(rgb)<.5?.3:1;
+  sctx.clearRect(0,0,innerWidth,innerHeight);
+  for(const s of stars){const a=(reduce?.6:.35+.35*Math.sin(t/900+s.p))*k;
+    sctx.fillStyle=`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
+    sctx.beginPath();sctx.arc(s.x,s.y,s.r,0,6.28);sctx.fill()}
+  if(!reduce)requestAnimationFrame(drawSky)}
+sizeSky();requestAnimationFrame(drawSky);
+
+/* confetti */
+const cf=document.getElementById('confetti'),cctx=cf.getContext('2d');let bits=[],running=false;
+function sizeConf(){const d=devicePixelRatio||1;cf.width=innerWidth*d;cf.height=innerHeight*d;
+  cctx.setTransform(d,0,0,d,0,0)}
+sizeConf();addEventListener('resize',()=>{sizeSky();sizeConf();if(reduce)drawSky(0)});
+function step(){cctx.clearRect(0,0,innerWidth,innerHeight);
+  for(let i=bits.length-1;i>=0;i--){const b=bits[i];
+    b.vy+=.32;b.vx*=.99;b.x+=b.vx;b.y+=b.vy;b.r+=b.vr;b.life++;
+    cctx.save();cctx.translate(b.x,b.y);cctx.rotate(b.r);cctx.fillStyle=b.c;
+    cctx.fillRect(-b.w/2,-b.h/2,b.w,b.h*Math.abs(Math.cos(b.life/8)));cctx.restore();
+    if(b.y>innerHeight+40)bits.splice(i,1)}
+  if(bits.length)requestAnimationFrame(step);else{running=false;cctx.clearRect(0,0,innerWidth,innerHeight)}}
+function burst(){const colors=css('--confetti').split(',').map(s=>s.trim());
+  for(let i=0;i<220;i++)bits.push({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*.45,
+    vx:(Math.random()-.5)*14,vy:-Math.random()*15-4,w:Math.random()*8+4,h:Math.random()*5+3,
+    r:Math.random()*6.28,vr:(Math.random()-.5)*.3,c:colors[(Math.random()*colors.length)|0],life:0});
+  if(!running){running=true;requestAnimationFrame(step)}}
+
+/* melody */
+const N={G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99};
+const SONG=[['G4',.75],['G4',.25],['A4',1],['G4',1],['C5',1],['B4',2],
+ ['G4',.75],['G4',.25],['A4',1],['G4',1],['D5',1],['C5',2],
+ ['G4',.75],['G4',.25],['G5',1],['E5',1],['C5',1],['B4',1],['A4',2],
+ ['F5',.75],['F5',.25],['E5',1],['C5',1],['D5',1],['C5',2.5]];
+const BEAT=.42,RATE=22050;let url=null;
+const player=new Audio();player.setAttribute('playsinline','');
+function renderSong(){const secs=SONG.reduce((t,[,b])=>t+b*BEAT,0);
+  const len=Math.ceil((secs+.3)*RATE),pcm=new Int16Array(len);let at=0;
+  for(const [n,b] of SONG){const d=b*BEAT,c=Math.floor(d*RATE),per=RATE/N[n];
+    for(let i=0;i<c;i++){const t=i/RATE,ph=(i%per)/per;
+      pcm[at+i]=(4*Math.abs(ph-.5)-1)*Math.min(1,t/.02)*Math.exp(-3*t/d)*.5*32767}at+=c}
+  const buf=new ArrayBuffer(44+len*2),v=new DataView(buf);
+  const s=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+  s(0,'RIFF');v.setUint32(4,36+len*2,true);s(8,'WAVE');s(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,RATE,true);v.setUint32(28,RATE*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  s(36,'data');v.setUint32(40,len*2,true);new Int16Array(buf,44).set(pcm);
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}))}
+function play(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch{}
+  if(!url)url=renderSong();player.src=url;player.currentTime=0;player.play()?.catch(()=>{})}
+
+/* candles */
+const box=document.getElementById('candles');
+for(let i=0;i<30;i++){const c=document.createElement('div');c.className='candle';
+  c.innerHTML='<span class="flame"></span><span class="smoke"></span><span class="stick"></span>';
+  box.appendChild(c)}
+const blow=document.getElementById('blow'),hint=document.getElementById('hint');let lit=true;
+blow.addEventListener('click',()=>{
+  [...box.children].forEach((c,i)=>setTimeout(()=>c.classList.toggle('out',lit),reduce?0:i*35));
+  if(lit){setTimeout(burst,reduce?0:600);play()}
+  blow.textContent=lit?'Yana yoqish':'Shamlarni puflash';
+  hint.textContent=lit?'Tilagingiz yo‘lga chiqdi ✨':'Avval tilak tilang. Ovozni yoqing 🔊';
+  box.setAttribute('aria-label',lit?'30 ta puflangan sham':'30 ta yoqilgan sham');
+  lit=!lit});
+
+/* colourway switch */
+document.querySelectorAll('.ways button').forEach(b=>b.addEventListener('click',()=>{
+  document.documentElement.dataset.way=b.dataset.set;
+  document.querySelectorAll('.ways button').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));
+}));
+</script>
+</body>
+</html>

@@ -1,0 +1,1340 @@
+<!doctype html>
+<html lang="uz" data-way="qora">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>birthdaygift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap">
+<style>
+@property --night      { syntax:'<color>'; inherits:true; initial-value:#0c0c0c }
+@property --night-2    { syntax:'<color>'; inherits:true; initial-value:#1b1b1b }
+@property --accent     { syntax:'<color>'; inherits:true; initial-value:#f2d9a0 }
+@property --accent-soft{ syntax:'<color>'; inherits:true; initial-value:#e3c08d }
+@property --accent-lift{ syntax:'<color>'; inherits:true; initial-value:#fdf6e6 }
+@property --paper      { syntax:'<color>'; inherits:true; initial-value:#f2e5c6 }
+@property --muted      { syntax:'<color>'; inherits:true; initial-value:#8a8276 }
+@property --flame      { syntax:'<color>'; inherits:true; initial-value:#f2d9a0 }
+
+:root{
+  --ease:cubic-bezier(.4,0,.2,1);
+  transition:--night .55s var(--ease),--night-2 .55s var(--ease),--accent .55s var(--ease),
+    --accent-soft .55s var(--ease),--accent-lift .55s var(--ease),--paper .55s var(--ease),
+    --muted .55s var(--ease),--flame .55s var(--ease);
+}
+@media (prefers-reduced-motion:reduce){:root{transition:none}}
+
+/* Sampled from the Baginy storefront: near-black, burgundy, champagne. */
+[data-way="qora"]{--night:#0c0c0c;--night-2:#1b1b1b;--accent:#f2d9a0;--accent-soft:#e3c08d;
+  --accent-lift:#fdf6e6;--paper:#f2e5c6;--muted:#8a8276;--flame:#f2d9a0;
+  --confetti:#f2d9a0,#f2e5c6,#e3c08d,#75162d,#ffffff}
+[data-way="vino"]{--night:#3a0a16;--night-2:#75162d;--accent:#f2d9a0;--accent-soft:#e3c08d;
+  --accent-lift:#fdf6e6;--paper:#f7ece0;--muted:#c0a2a8;--flame:#f2d9a0;
+  --confetti:#f2d9a0,#f7ece0,#e3c08d,#5c1024,#ffffff}
+[data-way="qaymoq"]{--night:#f2e5c6;--night-2:#faf3e4;--accent:#75162d;--accent-soft:#5c1024;
+  --accent-lift:#a8384f;--paper:#0c0c0c;--muted:#6b5d47;--flame:#c07d1e;
+  --confetti:#75162d,#0c0c0c,#e3c08d,#f2d9a0,#8a8276}
+
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0}
+body{
+  background:radial-gradient(120% 80% at 50% 0%,var(--night-2) 0%,var(--night) 60%) fixed,var(--night);
+  color:var(--paper);font-family:"Instrument Serif",Georgia,serif;
+  padding-inline:max(16px,env(safe-area-inset-left,0px));padding-block:0 56px;overflow-x:hidden;
+}
+#sky,#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#sky{z-index:0}#confetti{z-index:5}
+.mono{font-family:"DM Mono",ui-monospace,Menlo,monospace}
+
+/* ---------- top bar: language + colourway ---------- */
+.bar{position:sticky;top:0;z-index:20;display:flex;gap:18px;align-items:center;flex-wrap:wrap;
+  padding:12px 16px;margin-bottom:34px;
+  background:color-mix(in srgb,var(--night) 86%,transparent);backdrop-filter:blur(8px);
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 18%,transparent);
+  font-family:"DM Mono",ui-monospace,Menlo,monospace;font-size:12px}
+.bar .grp{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.bar .lbl{color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+.bar button{font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  background:transparent;color:var(--muted);
+  border:1px solid color-mix(in srgb,var(--accent) 26%,transparent);
+  border-radius:999px;padding:7px 13px;transition:.18s}
+.bar button:hover{color:var(--paper)}
+.bar button[aria-pressed="true"]{background:var(--accent);color:var(--night);border-color:var(--accent)}
+.bar button:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+.chip{width:11px;height:11px;border-radius:50%;display:inline-block}
+.bar .pick{font:inherit;cursor:pointer;color:var(--paper);
+  background:color-mix(in srgb,var(--paper) 8%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 26%,transparent);
+  border-radius:999px;padding:7px 30px 7px 14px;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+    linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.bar .pick:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+main{position:relative;z-index:1;max-width:620px;margin:0 auto;
+  display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center}
+.wide{max-width:980px}
+.eyebrow{font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--accent)}
+h1{font-weight:400;font-size:clamp(34px,8vw,52px);line-height:1.05;margin:0;text-wrap:balance}
+h1 em{color:var(--accent);font-style:normal}
+.lede{color:var(--muted);max-width:52ch;margin:0;font-size:18px;line-height:1.6}
+
+/* ---------- form ---------- */
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:30px;width:100%;text-align:left}
+@media(min-width:900px){.split{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:start}}
+.panel{background:color-mix(in srgb,var(--paper) 4%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+  border-radius:8px;padding:clamp(20px,4vw,30px)}
+.fields{display:flex;flex-direction:column;gap:17px}
+.f{display:flex;flex-direction:column;gap:7px}
+.f label{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.f input,.f select,.f textarea{
+  font-family:"Instrument Serif",Georgia,serif;font-size:18px;color:var(--paper);
+  background:color-mix(in srgb,var(--paper) 7%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+  border-radius:5px;padding:11px 13px;width:100%}
+.f textarea{resize:vertical;min-height:76px;line-height:1.45}
+.f input:focus-visible,.f select:focus-visible,.f textarea:focus-visible{
+  outline:2px solid var(--accent);outline-offset:1px}
+.f .help{font-family:"DM Mono",monospace;font-size:11px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.count{float:right;opacity:.7}
+.submit{font-family:"DM Mono",monospace;font-size:14px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--night);background:var(--accent);border:0;border-radius:999px;padding:16px 26px;
+  cursor:pointer;width:100%;margin-top:4px;
+  box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 22%,transparent)}
+.submit:hover{transform:translateY(-1px)}
+.alert{border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
+  border-left:3px solid var(--accent);border-radius:4px;padding:11px 13px;
+  font-family:"DM Mono",monospace;font-size:12px;line-height:1.6}
+
+/* ---------- card ---------- */
+.age{font-family:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;font-weight:900;
+  font-size:clamp(150px,42vw,260px);line-height:.8;letter-spacing:-.02em;margin:0;
+  background:linear-gradient(180deg,var(--accent-lift) 0%,var(--accent) 55%,var(--accent-soft) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 30px color-mix(in srgb,var(--accent) 25%,transparent))}
+.candles{display:grid;grid-template-columns:repeat(10,1fr);gap:14px 10px;width:100%;
+  max-width:420px;padding:8px 4px 0}
+.candle{position:relative;height:54px;display:flex;justify-content:center;align-items:flex-end}
+.candle .stick{width:8px;height:30px;border-radius:2px;
+  background:repeating-linear-gradient(135deg,var(--paper) 0 5px,var(--accent) 5px 9px)}
+.candle .flame{position:absolute;bottom:31px;left:50%;width:10px;height:18px;margin-left:-5px;
+  border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%,color-mix(in srgb,var(--flame) 55%,var(--accent-lift)) 0 25%,
+    var(--flame) 55%,transparent 75%);
+  box-shadow:0 0 14px 4px color-mix(in srgb,var(--flame) 45%,transparent);
+  transform-origin:50% 100%;animation:flicker 1.6s ease-in-out infinite alternate;
+  transition:opacity .35s ease,transform .35s ease}
+.candle:nth-child(3n) .flame{animation-duration:1.2s}
+.candle:nth-child(4n) .flame{animation-duration:2s;animation-delay:-.6s}
+.candle .smoke{position:absolute;bottom:32px;left:50%;width:6px;height:6px;margin-left:-3px;
+  border-radius:50%;background:color-mix(in srgb,var(--muted) 60%,transparent);opacity:0}
+.out .flame{opacity:0;transform:scale(.2) translateY(6px)}
+.out .smoke{animation:smoke 1.4s ease-out forwards}
+@keyframes flicker{0%{transform:rotate(-3deg) scaleY(1)}50%{transform:rotate(2deg) scaleY(1.08)}
+  100%{transform:rotate(-1deg) scaleY(.94)}}
+@keyframes smoke{0%{opacity:.7;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(6px,-36px) scale(3)}}
+.blow{font-family:"DM Mono",monospace;font-size:14px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--night);background:var(--accent);border:0;border-radius:999px;padding:15px 28px;
+  cursor:pointer;box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 25%,transparent);
+  transition:transform .15s ease}
+.blow:hover{transform:translateY(-2px)}
+.hint{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted);margin-top:-14px}
+.letter{width:100%;text-align:left;background:color-mix(in srgb,var(--paper) 4%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:6px;
+  padding:28px clamp(20px,6vw,40px);font-size:21px;line-height:1.5;
+  display:flex;flex-direction:column;gap:16px}
+.letter p{margin:0;max-width:60ch}
+.letter .sign{font-style:italic;color:var(--accent);text-align:right}
+.ledger{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;
+  background:color-mix(in srgb,var(--accent) 22%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:6px;overflow:hidden}
+.ledger div{background:var(--night);padding:16px 8px;display:flex;flex-direction:column;gap:4px}
+.ledger b{font-family:"Big Shoulders Display",sans-serif;font-weight:700;
+  font-size:clamp(26px,7vw,36px);color:var(--paper);font-variant-numeric:tabular-nums;line-height:1}
+.ledger span{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted)}
+.math{display:flex;flex-direction:column;gap:10px;align-items:center}
+.math p{margin:0;font-size:20px;color:var(--muted);max-width:40ch;text-wrap:balance}
+.math .eq{font-family:"Big Shoulders Display",sans-serif;font-weight:700;
+  font-size:clamp(40px,11vw,60px);color:var(--accent);letter-spacing:.02em}
+.note{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted);line-height:1.7}
+.note a{color:var(--accent);cursor:pointer}
+.link{font-family:"DM Mono",monospace;font-size:13px;word-break:break-all;
+  background:color-mix(in srgb,var(--paper) 7%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+  border-radius:5px;padding:12px 14px;color:var(--paper)}
+.rowbtn{display:flex;gap:10px;flex-wrap:wrap}
+.rowbtn button{font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;border-radius:999px;padding:12px 20px;cursor:pointer;
+  border:1px solid var(--accent);background:transparent;color:var(--accent)}
+.rowbtn button.primary{background:var(--accent);color:var(--night)}
+.meter{display:flex;align-items:center;gap:11px;padding:2px 0}
+.meter-bar{flex:1;height:4px;border-radius:2px;
+  background:color-mix(in srgb,var(--paper) 12%,transparent);overflow:hidden}
+.meter-bar i{display:block;height:100%;width:0;background:var(--accent);
+  border-radius:2px;transition:width .35s var(--ease)}
+.meter-text{font-family:"DM Mono",monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.more{border-top:1px solid color-mix(in srgb,var(--accent) 18%,transparent);padding-top:14px}
+.more>summary{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);cursor:pointer;list-style:none}
+.more>summary::-webkit-details-marker{display:none}
+.more>summary::before{content:"— ";}
+.more:not([open])>summary::before{content:"+ ";}
+[hidden]{display:none!important}
+@media (max-width:420px){.candles{gap:10px 6px}.letter{font-size:19px}.two{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.candle .flame{animation:none}}
+</style>
+</head>
+<body>
+<nav class="bar">
+  <div class="grp">
+    <label class="lbl" for="lang-select">Til</label>
+    <select id="lang-select" class="pick">
+      <option value="uz">O‘zbekcha</option>
+      <option value="en">English</option>
+      <option value="ko">한국어</option>
+      <option value="ru">Русский</option>
+    </select>
+  </div>
+  <div class="grp">
+    <span class="lbl" id="lbl-way">Rang</span>
+    <button data-way="qora" aria-pressed="true"><i class="chip" style="background:#f2d9a0"></i><span data-t="way.qora">Qora</span></button>
+    <button data-way="vino" aria-pressed="false"><i class="chip" style="background:#75162d"></i><span data-t="way.vino">Vino</span></button>
+    <button data-way="qaymoq" aria-pressed="false"><i class="chip" style="background:#f2e5c6"></i><span data-t="way.qaymoq">Qaymoq</span></button>
+  </div>
+</nav>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<!-- ===================== CREATE ===================== -->
+<main class="wide" id="screen-form">
+  <div class="eyebrow" data-t="form.eyebrow">birthdaygift</div>
+  <h1 data-t="form.title">Tug‘ilgan kun tabrigi</h1>
+  <p class="lede" data-t="form.lede">Bir necha maydonni to‘ldiring — havola qaytadi.</p>
+
+  <div class="split">
+    <form class="panel" id="create" novalidate>
+      <div class="fields">
+        <div class="two">
+          <div class="f">
+            <label for="f-name" data-t="form.name">Ism</label>
+            <input id="f-name" name="name" maxlength="40" autocomplete="off" required>
+          </div>
+          <div class="f">
+            <label for="f-age" data-t="form.age">Yosh</label>
+            <input id="f-age" name="age" type="number" inputmode="numeric" min="1" max="129">
+          </div>
+        </div>
+
+        <div class="two">
+          <div class="f">
+            <label for="f-relation" data-t="form.relation">Kim bo‘ladi</label>
+            <select id="f-relation" name="relation">
+              <option value="friend" data-t="rel.friend">Do‘stim</option>
+              <option value="classmate" data-t="rel.classmate">Sinfdoshim</option>
+              <option value="colleague" data-t="rel.colleague">Hamkasbim</option>
+              <option value="family" data-t="rel.family">Qarindoshim</option>
+              <option value="other" data-t="rel.other">Boshqa</option>
+            </select>
+          </div>
+          <div class="f">
+            <label for="f-from" data-t="form.from">Kimdan</label>
+            <input id="f-from" name="from" maxlength="40" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="meter">
+          <div class="meter-bar"><i id="meter-fill"></i></div>
+          <span class="meter-text" id="meter-text"></span>
+        </div>
+
+        <details class="more" id="more" open>
+          <summary data-t="form.optional">Shaxsiylashtirish</summary>
+          <div class="fields" style="margin-top:16px">
+
+            <div class="two">
+              <div class="f">
+                <label for="f-nick" data-t="form.nick">Qanday chaqirasiz</label>
+                <input id="f-nick" name="nick" maxlength="30" autocomplete="off">
+              </div>
+              <div class="f">
+                <label for="f-gender" data-t="form.gender">Jinsi</label>
+                <select id="f-gender" name="gender">
+                  <option value="unspecified" data-t="gender.unspecified">Aytmayman</option>
+                  <option value="female" data-t="gender.female">Ayol</option>
+                  <option value="male" data-t="gender.male">Erkak</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="f">
+              <label for="f-field" data-t="form.field">Sohasi</label>
+              <select id="f-field" name="field">
+                <option value="other" data-t="field.other">Boshqa</option>
+                <option value="tech" data-t="field.tech">IT, dasturchi</option>
+                <option value="math" data-t="field.math">Matematika, muhandislik</option>
+                <option value="medicine" data-t="field.medicine">Tibbiyot</option>
+                <option value="education" data-t="field.education">Ta‘lim</option>
+                <option value="arts" data-t="field.arts">San‘at, ijod</option>
+                <option value="sport" data-t="field.sport">Sport</option>
+                <option value="business" data-t="field.business">Biznes, moliya</option>
+              </select>
+              <span class="help" data-t="form.fieldHelp">Kartadagi raqam shunga qarab tanlanadi.</span>
+            </div>
+
+            <div class="f">
+              <label for="f-traits" data-t="form.traits">Qanday odam</label>
+              <input id="f-traits" name="traits" maxlength="80" autocomplete="off">
+              <span class="help" data-t="form.traitsHelp">Masalan: xotirjam, mehnatkash, hazilkash</span>
+            </div>
+
+            <div class="f">
+              <label for="f-likes" data-t="form.likes">Nimani yaxshi ko‘radi</label>
+              <input id="f-likes" name="likes" maxlength="80" autocomplete="off">
+            </div>
+
+            <div class="two">
+              <div class="f">
+                <label for="f-met" data-t="form.met">Qayerda tanishgansiz</label>
+                <input id="f-met" name="met" maxlength="60" autocomplete="off">
+              </div>
+              <div class="f">
+                <label for="f-years" data-t="form.years">Necha yildan beri</label>
+                <input id="f-years" name="years" type="number" inputmode="numeric" min="1" max="99">
+              </div>
+            </div>
+
+            <div class="f">
+              <label for="f-memory" data-t="form.memory">Birga eslanadigan narsa</label>
+              <textarea id="f-memory" name="memory" maxlength="220"></textarea>
+              <span class="help"><span data-t="form.memoryHelp">Aniq bir voqea bo‘lsa yaxshi.</span><span class="count" id="count-memory">0/220</span></span>
+            </div>
+
+            <div class="f">
+              <label for="f-gratitude" data-t="form.gratitude">Nima uchun minnatdorsiz</label>
+              <textarea id="f-gratitude" name="gratitude" maxlength="200"></textarea>
+              <span class="help" data-t="form.gratitudeHelp">Sizga nimani o‘rgatgan, nimada yordam bergan.</span>
+            </div>
+
+            <div class="f">
+              <label for="f-unsaid" data-t="form.unsaid">Hech aytmagan gap</label>
+              <textarea id="f-unsaid" name="unsaid" maxlength="200"></textarea>
+              <span class="help" data-t="form.unsaidHelp">Xatning eng kuchli joyi shu bo‘ladi.</span>
+            </div>
+
+            <div class="f">
+              <label for="f-next" data-t="form.next">Birga nima qilmoqchisiz</label>
+              <input id="f-next" name="next" maxlength="120" autocomplete="off">
+              <span class="help" data-t="form.nextHelp">Javob yozishga undaydi.</span>
+            </div>
+
+            <div class="f">
+              <label for="f-tone" data-t="form.tone">Ohang</label>
+              <select id="f-tone" name="tone">
+                <option value="warm" data-t="tone.warm">Iliq</option>
+                <option value="funny" data-t="tone.funny">Hazil</option>
+                <option value="formal" data-t="tone.formal">Rasmiy</option>
+                <option value="short" data-t="tone.short">Qisqa</option>
+              </select>
+            </div>
+          </div>
+        </details>
+
+        <p class="alert" id="err" hidden role="alert"></p>
+        <button class="submit" type="submit" data-t="form.submit">Tabrik yaratish</button>
+      </div>
+    </form>
+
+    <aside class="panel" id="preview-panel">
+      <div class="eyebrow" data-t="form.preview">Ko‘rinishi</div>
+      <p class="age" id="pv-age" style="font-size:clamp(70px,14vw,120px)" hidden></p>
+      <h2 style="font-family:'Instrument Serif';font-weight:400;font-size:28px;margin:10px 0 0">
+        <span id="pv-greet">Tug‘ilgan kuningiz bilan,</span>
+        <em style="color:var(--accent);font-style:normal" id="pv-name">—</em>
+      </h2>
+      <div class="candles" id="pv-candles" style="max-width:300px;margin-top:18px"></div>
+      <p class="note" id="pv-summary" style="margin-top:18px"></p>
+    </aside>
+  </div>
+</main>
+
+<!-- ===================== CARD ===================== -->
+<main id="screen-card" hidden>
+  <div class="eyebrow" data-t="card.eyebrow">Tug‘ilgan kun tabrigi</div>
+  <p class="age" id="c-age" aria-label=""></p>
+  <h1><span id="c-greet"></span><br><em id="c-name"></em></h1>
+
+  <div class="candles" id="c-candles"></div>
+  <button class="blow" id="c-blow" type="button"></button>
+  <div class="hint" id="c-hint"></div>
+
+  <article class="letter" id="c-letter"></article>
+
+  <section class="ledger" id="c-ledger"></section>
+
+  <div class="math" id="c-math">
+    <div class="eyebrow" id="c-math-title"></div>
+    <p class="eq" id="c-eq"></p>
+    <p id="c-math-note"></p>
+  </div>
+
+  <div class="panel" style="width:100%;display:flex;flex-direction:column;gap:12px">
+    <div class="eyebrow" data-t="card.linkTitle">Havola</div>
+    <div class="link" id="c-link"></div>
+    <div class="rowbtn">
+      <button class="primary" id="c-copy" type="button"></button>
+      <button id="c-again" type="button"></button>
+    </div>
+  </div>
+
+  <p class="note" id="c-expiry"></p>
+</main>
+<script>
+/* ============================ interface copy ============================ */
+const COPY = {
+uz:{
+ 'form.field':'Sohasi','form.fieldHelp':'Kartadagi raqam shunga qarab tanlanadi.',
+ 'field.other':'Boshqa','field.tech':'IT, dasturchi','field.math':'Matematika, muhandislik',
+ 'field.medicine':'Tibbiyot','field.education':'Ta‘lim','field.arts':'San‘at, ijod',
+ 'field.sport':'Sport','field.business':'Biznes, moliya',
+ 'fact.code':'Ikkilik sanoqda','fact.number':'Bir kichik matematika','fact.heart':'Yurak hisobi',
+ 'fact.words':'Aytilgan so‘zlar','fact.seasons':'Ko‘rilgan bahorlar','fact.orbit':'Quyosh atrofida',
+ 'fact.sleep':'Uyquda o‘tgan yillar',
+ 'form.optional':'Shaxsiylashtirish','form.nick':'Qanday chaqirasiz',
+ 'form.met':'Qayerda tanishgansiz','form.years':'Necha yildan beri',
+ 'form.gratitude':'Nima uchun minnatdorsiz',
+ 'form.gratitudeHelp':'Sizga nimani o‘rgatgan, nimada yordam bergan.',
+ 'form.unsaid':'Hech aytmagan gap','form.unsaidHelp':'Xatning eng kuchli joyi shu bo‘ladi.',
+ 'form.next':'Birga nima qilmoqchisiz','form.nextHelp':'Javob yozishga undaydi.',
+ meter:'{n} ta maydon to‘ldirildi',meterHint:'Ko‘proq to‘ldirsangiz, xat shaxsiyroq chiqadi.',
+ meterFull:'Hammasi to‘ldirildi — xat eng to‘liq holatda chiqadi.',
+ 'form.eyebrow':'birthdaygift','form.title':'Tug‘ilgan kun tabrigi',
+ 'form.lede':'Quyidagilarni to‘ldiring — tabrik xati va karta shundan yoziladi. Havola 5 kun yashaydi.',
+ 'form.name':'Ism','form.age':'Yosh','form.gender':'Jinsi','form.relation':'Kim bo‘ladi',
+ 'form.traits':'Qanday odam','form.traitsHelp':'Masalan: xotirjam, mehnatkash, hazilkash',
+ 'form.likes':'Nimani yaxshi ko‘radi','form.memory':'Birga eslanadigan narsa',
+ 'form.memoryHelp':'Aniq bir voqea bo‘lsa yaxshi.',
+ 'form.tone':'Ohang','form.from':'Kimdan','form.submit':'Tabrik yaratish','form.preview':'Ko‘rinishi',
+ 'gender.unspecified':'Aytmayman','gender.female':'Ayol','gender.male':'Erkak',
+ 'rel.friend':'Do‘stim','rel.classmate':'Sinfdoshim','rel.colleague':'Hamkasbim',
+ 'rel.family':'Qarindoshim','rel.other':'Boshqa',
+ 'tone.warm':'Iliq','tone.funny':'Hazil','tone.formal':'Rasmiy','tone.short':'Qisqa',
+ 'way.qora':'Qora','way.vino':'Vino','way.qaymoq':'Qaymoq','bar.lang':'Til','bar.way':'Rang',
+ 'card.eyebrow':'Tug‘ilgan kun tabrigi','card.linkTitle':'Havola',
+ happy:'Tug‘ilgan kuningiz bilan,',blow:'Shamlarni puflash',relight:'Yana yoqish',
+ hint:'Avval tilak tilang. Ovozni yoqing 🔊',wished:'Tilagingiz yo‘lga chiqdi ✨',
+ lit:'ta yoqilgan sham',out:'ta puflangan sham',
+ years:'yil',months:'oy',days:'kun',mathTitle:'Bir kichik matematika',
+ primeEq:'{n} — tub son',primeOne:'Tub son — bo‘linmaydigan yosh.',primeMany:'Tub ko‘paytuvchilarga ajratilgani.',
+ from:'Tabrik: ',expires:'Bu havola 5 kundan keyin o‘chadi.',
+ copy:'Nusxalash',copied:'Nusxalandi',again:'Yana bitta',
+ errName:'Ismni yozing (kamida 2 harf).',errAge:'Yosh 1 dan 129 gacha bo‘lsin.',
+ pvEmpty:'Maydonlarni to‘ldirganingizda shu yer o‘zgaradi.',pvCandles:'ta sham'},
+en:{
+ 'form.field':'Field of work','form.fieldHelp':'This decides which number the card shows.',
+ 'field.other':'Other','field.tech':'IT, software','field.math':'Maths, engineering',
+ 'field.medicine':'Medicine','field.education':'Education','field.arts':'Arts',
+ 'field.sport':'Sport','field.business':'Business, finance',
+ 'fact.code':'In binary','fact.number':'A little arithmetic','fact.heart':'By the heartbeat',
+ 'fact.words':'Words spoken','fact.seasons':'Springs seen','fact.orbit':'Around the sun',
+ 'fact.sleep':'Years asleep',
+ 'form.optional':'Make it personal','form.nick':'What you call them',
+ 'form.met':'Where you met','form.years':'Years you have known them',
+ 'form.gratitude':'What you are grateful for',
+ 'form.gratitudeHelp':'What they taught you, or helped you through.',
+ 'form.unsaid':'Something you never said','form.unsaidHelp':'This is where the letter lands hardest.',
+ 'form.next':'Something to do together','form.nextHelp':'It gives them a reason to reply.',
+ meter:'{n} fields filled',meterHint:'The more you fill in, the more personal the letter.',
+ meterFull:'All filled in — the letter comes out at its fullest.',
+ 'form.eyebrow':'birthdaygift','form.title':'A birthday card',
+ 'form.lede':'Fill these in — the letter and the card are written from them. The link lives five days.',
+ 'form.name':'Name','form.age':'Age','form.gender':'Gender','form.relation':'Who they are to you',
+ 'form.traits':'What they are like','form.traitsHelp':'For example: calm, hard-working, funny',
+ 'form.likes':'What they love','form.memory':'Something you both remember',
+ 'form.memoryHelp':'A specific moment works best.',
+ 'form.tone':'Tone','form.from':'From','form.submit':'Create the card','form.preview':'Preview',
+ 'gender.unspecified':'Rather not say','gender.female':'Woman','gender.male':'Man',
+ 'rel.friend':'Friend','rel.classmate':'Classmate','rel.colleague':'Colleague',
+ 'rel.family':'Family','rel.other':'Other',
+ 'tone.warm':'Warm','tone.funny':'Playful','tone.formal':'Formal','tone.short':'Short',
+ 'way.qora':'Black','way.vino':'Wine','way.qaymoq':'Cream','bar.lang':'Language','bar.way':'Colour',
+ 'card.eyebrow':'A birthday card','card.linkTitle':'Link',
+ happy:'Happy birthday,',blow:'Blow out the candles',relight:'Light them again',
+ hint:'Make a wish first. Sound on 🔊',wished:'Your wish is on its way ✨',
+ lit:'lit candles',out:'candles, blown out',
+ years:'years',months:'months',days:'days',mathTitle:'A little arithmetic',
+ primeEq:'{n} is prime',primeOne:'A prime number — an age that does not divide.',primeMany:'Broken into its prime factors.',
+ from:'From ',expires:'This link disappears in 5 days.',
+ copy:'Copy',copied:'Copied',again:'Make another',
+ errName:'Please enter a name (at least 2 letters).',errAge:'Age must be between 1 and 129.',
+ pvEmpty:'This updates as you fill the form.',pvCandles:'candles'},
+ko:{
+ 'form.field':'분야','form.fieldHelp':'카드에 나올 숫자가 이걸 따라 정해집니다.',
+ 'field.other':'기타','field.tech':'IT, 개발','field.math':'수학, 공학',
+ 'field.medicine':'의료','field.education':'교육','field.arts':'예술',
+ 'field.sport':'스포츠','field.business':'비즈니스, 금융',
+ 'fact.code':'2진수로 보면','fact.number':'작은 산수','fact.heart':'심장이 뛴 횟수',
+ 'fact.words':'지금까지 한 말','fact.seasons':'지나온 봄','fact.orbit':'태양 둘레를',
+ 'fact.sleep':'잠으로 보낸 시간',
+ 'form.optional':'더 개인적으로','form.nick':'평소 부르는 호칭',
+ 'form.met':'어디서 만났나요','form.years':'알고 지낸 햇수',
+ 'form.gratitude':'고마운 점',
+ 'form.gratitudeHelp':'무엇을 배웠는지, 어떤 도움을 받았는지.',
+ 'form.unsaid':'한 번도 못 한 말','form.unsaidHelp':'편지에서 가장 와닿는 부분이 됩니다.',
+ 'form.next':'같이 하고 싶은 일','form.nextHelp':'답장할 이유가 생깁니다.',
+ meter:'{n}개 항목 작성됨',meterHint:'많이 쓸수록 편지가 더 개인적으로 바뀝니다.',
+ meterFull:'모두 작성됐습니다 — 가장 충실한 편지가 나옵니다.',
+ 'form.eyebrow':'birthdaygift','form.title':'생일 카드',
+ 'form.lede':'아래를 채워 주세요 — 편지와 카드가 여기서 만들어집니다. 링크는 5일간 유효합니다.',
+ 'form.name':'이름','form.age':'나이','form.gender':'성별','form.relation':'어떤 관계',
+ 'form.traits':'어떤 분인가요','form.traitsHelp':'예: 차분한, 성실한, 유쾌한',
+ 'form.likes':'좋아하는 것','form.memory':'함께한 기억',
+ 'form.memoryHelp':'구체적인 장면일수록 좋습니다.',
+ 'form.tone':'분위기','form.from':'보내는 사람','form.submit':'카드 만들기','form.preview':'미리 보기',
+ 'gender.unspecified':'밝히지 않음','gender.female':'여성','gender.male':'남성',
+ 'rel.friend':'친구','rel.classmate':'동창','rel.colleague':'동료',
+ 'rel.family':'가족','rel.other':'기타',
+ 'tone.warm':'따뜻하게','tone.funny':'유쾌하게','tone.formal':'정중하게','tone.short':'짧게',
+ 'way.qora':'블랙','way.vino':'와인','way.qaymoq':'크림','bar.lang':'언어','bar.way':'색상',
+ 'card.eyebrow':'생일 카드','card.linkTitle':'링크',
+ happy:'생일 축하합니다,',blow:'촛불 끄기',relight:'다시 켜기',
+ hint:'먼저 소원을 빌어요. 소리를 켜 주세요 🔊',wished:'소원이 전해졌어요 ✨',
+ lit:'개의 켜진 촛불',out:'개의 꺼진 촛불',
+ years:'년',months:'개월',days:'일',mathTitle:'작은 산수',
+ primeEq:'{n} — 소수',primeOne:'소수 — 나누어지지 않는 나이.',primeMany:'소인수분해한 모습.',
+ from:'보낸 사람: ',expires:'이 링크는 5일 후에 사라집니다.',
+ copy:'복사',copied:'복사됨',again:'하나 더',
+ errName:'이름을 입력해 주세요 (2자 이상).',errAge:'나이는 1에서 129 사이여야 합니다.',
+ pvEmpty:'입력하시면 여기가 바뀝니다.',pvCandles:'개의 촛불'},
+ru:{
+ 'form.field':'Сфера','form.fieldHelp':'От неё зависит, какое число покажет открытка.',
+ 'field.other':'Другое','field.tech':'IT, разработка','field.math':'Математика, инженерия',
+ 'field.medicine':'Медицина','field.education':'Образование','field.arts':'Искусство',
+ 'field.sport':'Спорт','field.business':'Бизнес, финансы',
+ 'fact.code':'В двоичном виде','fact.number':'Немного арифметики','fact.heart':'Ударов сердца',
+ 'fact.words':'Сказано слов','fact.seasons':'Увидено вёсен','fact.orbit':'Вокруг Солнца',
+ 'fact.sleep':'Лет во сне',
+ 'form.optional':'Сделать личным','form.nick':'Как вы его называете',
+ 'form.met':'Где познакомились','form.years':'Сколько лет знакомы',
+ 'form.gratitude':'За что благодарны',
+ 'form.gratitudeHelp':'Чему научил, в чём помог.',
+ 'form.unsaid':'Что так и не сказали','form.unsaidHelp':'Это самая сильная часть письма.',
+ 'form.next':'Что хотите сделать вместе','form.nextHelp':'Даёт повод ответить.',
+ meter:'заполнено полей: {n}',meterHint:'Чем больше заполнено, тем личнее письмо.',
+ meterFull:'Всё заполнено — письмо выйдет самым полным.',
+ 'form.eyebrow':'birthdaygift','form.title':'Открытка на день рождения',
+ 'form.lede':'Заполни поля — письмо и открытка пишутся из них. Ссылка живёт пять дней.',
+ 'form.name':'Имя','form.age':'Возраст','form.gender':'Пол','form.relation':'Кто он тебе',
+ 'form.traits':'Какой он человек','form.traitsHelp':'Например: спокойный, трудолюбивый, весёлый',
+ 'form.likes':'Что любит','form.memory':'Что вы вместе помните',
+ 'form.memoryHelp':'Лучше всего — конкретный случай.',
+ 'form.tone':'Тон','form.from':'От кого','form.submit':'Создать открытку','form.preview':'Предпросмотр',
+ 'gender.unspecified':'Не указывать','gender.female':'Женщина','gender.male':'Мужчина',
+ 'rel.friend':'Друг','rel.classmate':'Одноклассник','rel.colleague':'Коллега',
+ 'rel.family':'Родственник','rel.other':'Другое',
+ 'tone.warm':'Тёплый','tone.funny':'С юмором','tone.formal':'Официальный','tone.short':'Короткий',
+ 'way.qora':'Чёрный','way.vino':'Винный','way.qaymoq':'Кремовый','bar.lang':'Язык','bar.way':'Цвет',
+ 'card.eyebrow':'Открытка на день рождения','card.linkTitle':'Ссылка',
+ happy:'С днём рождения,',blow:'Задуть свечи',relight:'Зажечь снова',
+ hint:'Сначала загадай желание. Включи звук 🔊',wished:'Желание отправлено ✨',
+ lit:'зажжённых свечей',out:'задутых свечей',
+ years:'лет',months:'месяцев',days:'дней',mathTitle:'Немного арифметики',
+ primeEq:'{n} — простое число',primeOne:'Простое число — возраст, который не делится.',primeMany:'Разложено на простые множители.',
+ from:'От ',expires:'Эта ссылка исчезнет через 5 дней.',
+ copy:'Копировать',copied:'Скопировано',again:'Ещё одну',
+ errName:'Введи имя (минимум 2 буквы).',errAge:'Возраст должен быть от 1 до 129.',
+ pvEmpty:'Здесь всё меняется, пока ты заполняешь форму.',pvCandles:'свечей'}
+};
+
+/* ======================= what is true about this number =======================
+   The one genuinely clever thing a template can do, because it is computed
+   rather than recalled: every age gets a fact that is true only of it. The
+   pools above repeat if you read enough cards; this never does, because 28 is
+   a perfect number and 30 is not and no amount of rephrasing changes that. */
+
+const FIB=new Set([1,2,3,5,8,13,21,34,55,89]);
+const TRI=new Set(Array.from({length:19},(_,i)=>(i+1)*(i+2)/2));
+const FACTORIAL={2:2,6:3,24:4,120:5};
+const PRIMORIAL={2:1,6:2,30:3,210:4};
+
+function factorise(n){const f=[];let r=n,d=2;
+  while(d*d<=r){while(r%d===0){f.push(d);r/=d}d+=d===2?1:2}
+  if(r>1)f.push(r);return f}
+
+function properDivisors(n){const out=[];for(let i=1;i<n;i++)if(n%i===0)out.push(i);return out}
+
+/** The most interesting true statement about an age, in priority order. */
+function numberFact(n){
+  if(!n||n<2) return null;
+  const f=factorise(n);
+
+  if(n<10000){
+    const div=properDivisors(n);
+    if(div.reduce((a,b)=>a+b,0)===n) return {kind:'perfect',parts:div};
+  }
+  if(FACTORIAL[n]) return {kind:'factorial',k:FACTORIAL[n]};
+  if(PRIMORIAL[n]&&n>2) return {kind:'primorial',k:PRIMORIAL[n],f};
+  if(n===36) return {kind:'squareTriangular'};
+  if((n&(n-1))===0) return {kind:'power2',k:Math.log2(n)};
+  const c=Math.round(Math.cbrt(n)); if(c**3===n) return {kind:'cube',k:c};
+  const s=Math.round(Math.sqrt(n)); if(s*s===n) return {kind:'square',k:s};
+  if(FIB.has(n)) return {kind:'fibonacci'};
+  if(TRI.has(n)) return {kind:'triangular',k:Math.round((Math.sqrt(8*n+1)-1)/2)};
+  if(n>=11&&new Set(String(n)).size===1) return {kind:'repdigit'};
+  if(f.length===1) return {kind:'prime'};
+  if(n%10===0) return {kind:'round',f};
+  return {kind:'factors',f};
+}
+
+const FACT_COPY={
+uz:{
+ perfect:(n,d)=>[`${n} = ${d.parts.join(' + ')}`,
+   `Mukammal son — o‘z bo‘luvchilarining yig‘indisiga teng. Yuzgacha bor-yo‘g‘i ikkitasi bor.`],
+ factorial:(n,d)=>[`${n} = ${d.k}!`,
+   `Birdan ${d.k} gacha hamma sonning ko‘paytmasi. Toza raqam.`],
+ primorial:(n,d)=>[`${n} = ${d.f.join(' × ')}`,
+   `Dastlabki ${d.k} ta tub sonning ko‘paytmasi. Har yoshga nasib qilmaydi.`],
+ squareTriangular:n=>[`${n} = 6² = 1+2+…+8`,
+   `Ham kvadrat, ham uchburchak son. Bunaqasi juda kam — keyingisi 1225.`],
+ power2:(n,d)=>[`${n} = 2${'⁰¹²³⁴⁵⁶⁷⁸⁹'[d.k]}`,
+   `Ikkining darajasi. Kompyuterlar shu sonlarni yaxshi ko‘radi.`],
+ cube:(n,d)=>[`${n} = ${d.k}³`,
+   `To‘liq kub. Yuzgacha faqat to‘rttasi bor.`],
+ square:(n,d)=>[`${n} = ${d.k}²`,
+   `To‘liq kvadrat — qiyshiq joyi yo‘q yosh.`],
+ fibonacci:n=>[`${n} — Fibonachchi soni`,
+   `Oldingi ikkitasining yig‘indisi. Tabiat shu ketma-ketlikda o‘sadi.`],
+ triangular:(n,d)=>[`${n} = 1+2+…+${d.k}`,
+   `Uchburchak son. ${d.k} qatorli piramida aynan shuncha bo‘ladi.`],
+ repdigit:n=>[`${n}`,`Ikki bir xil raqam. Yiliga bir marta ham emas, umrda bir marta.`],
+ prime:n=>[`${n} — tub son`,`Faqat o‘ziga va birga bo‘linadi. Boshqa hech kimga.`],
+ round:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`Yumaloq son. Bunaqa yillar esda qoladi.`],
+ factors:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`Tub ko‘paytuvchilarga ajratilgani.`]},
+en:{
+ perfect:(n,d)=>[`${n} = ${d.parts.join(' + ')}`,
+   `A perfect number — equal to the sum of its own divisors. There are only two below a hundred.`],
+ factorial:(n,d)=>[`${n} = ${d.k}!`,`Every number from one to ${d.k}, multiplied. A tidy figure.`],
+ primorial:(n,d)=>[`${n} = ${d.f.join(' × ')}`,
+   `The product of the first ${d.k} primes. Not every age can say that.`],
+ squareTriangular:n=>[`${n} = 6² = 1+2+…+8`,
+   `Square and triangular at once. The next one is 1225.`],
+ power2:(n,d)=>[`${n} = 2${'⁰¹²³⁴⁵⁶⁷⁸⁹'[d.k]}`,`A power of two. Computers are fond of these.`],
+ cube:(n,d)=>[`${n} = ${d.k}³`,`A perfect cube. There are only four below a hundred.`],
+ square:(n,d)=>[`${n} = ${d.k}²`,`A perfect square — an age with no rough edges.`],
+ fibonacci:n=>[`${n} is a Fibonacci number`,
+   `The sum of the two before it. This is the sequence things grow along.`],
+ triangular:(n,d)=>[`${n} = 1+2+…+${d.k}`,
+   `A triangular number: a pyramid ${d.k} rows deep comes to exactly this.`],
+ repdigit:n=>[`${n}`,`Twice the same digit. That happens once in a life, not once a year.`],
+ prime:n=>[`${n} is prime`,`It divides by itself and one. By nothing else.`],
+ round:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`A round number. These are the years people remember.`],
+ factors:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`Broken into its prime factors.`]},
+ko:{
+ perfect:(n,d)=>[`${n} = ${d.parts.join(' + ')}`,
+   `완전수 — 자기 약수의 합과 같습니다. 100 아래에는 둘뿐입니다.`],
+ factorial:(n,d)=>[`${n} = ${d.k}!`,`1부터 ${d.k}까지 모두 곱한 수. 깔끔하죠.`],
+ primorial:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`처음 ${d.k}개 소수의 곱. 흔한 나이는 아닙니다.`],
+ squareTriangular:n=>[`${n} = 6² = 1+2+…+8`,`제곱수이면서 삼각수. 다음은 1225입니다.`],
+ power2:(n,d)=>[`${n} = 2${'⁰¹²³⁴⁵⁶⁷⁸⁹'[d.k]}`,`2의 거듭제곱. 컴퓨터가 좋아하는 숫자죠.`],
+ cube:(n,d)=>[`${n} = ${d.k}³`,`완전세제곱수. 100 아래에 넷뿐입니다.`],
+ square:(n,d)=>[`${n} = ${d.k}²`,`완전제곱수 — 모난 데 없는 나이.`],
+ fibonacci:n=>[`${n} — 피보나치 수`,`앞의 두 수를 더한 값. 자연이 자라는 순서입니다.`],
+ triangular:(n,d)=>[`${n} = 1+2+…+${d.k}`,`삼각수. ${d.k}층 피라미드가 정확히 이만큼입니다.`],
+ repdigit:n=>[`${n}`,`같은 숫자 둘. 해마다 오는 일이 아니라 평생 한 번입니다.`],
+ prime:n=>[`${n} — 소수`,`1과 자기 자신 말고는 나누어지지 않습니다.`],
+ round:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`딱 떨어지는 수. 이런 해는 오래 기억됩니다.`],
+ factors:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`소인수분해한 모습.`]},
+ru:{
+ perfect:(n,d)=>[`${n} = ${d.parts.join(' + ')}`,
+   `Совершенное число — равно сумме своих делителей. До сотни таких всего два.`],
+ factorial:(n,d)=>[`${n} = ${d.k}!`,`Все числа от одного до ${d.k}, перемноженные. Аккуратно.`],
+ primorial:(n,d)=>[`${n} = ${d.f.join(' × ')}`,
+   `Произведение первых ${d.k} простых чисел. Не каждому возрасту так везёт.`],
+ squareTriangular:n=>[`${n} = 6² = 1+2+…+8`,`И квадрат, и треугольное. Следующее — 1225.`],
+ power2:(n,d)=>[`${n} = 2${'⁰¹²³⁴⁵⁶⁷⁸⁹'[d.k]}`,`Степень двойки. Компьютеры такие любят.`],
+ cube:(n,d)=>[`${n} = ${d.k}³`,`Полный куб. До сотни их всего четыре.`],
+ square:(n,d)=>[`${n} = ${d.k}²`,`Полный квадрат — возраст без острых углов.`],
+ fibonacci:n=>[`${n} — число Фибоначчи`,`Сумма двух предыдущих. По этому ряду растёт природа.`],
+ triangular:(n,d)=>[`${n} = 1+2+…+${d.k}`,`Треугольное число: пирамида в ${d.k} рядов — ровно столько.`],
+ repdigit:n=>[`${n}`,`Две одинаковые цифры. Такое бывает раз в жизни, а не раз в год.`],
+ prime:n=>[`${n} — простое число`,`Делится только на себя и на единицу.`],
+ round:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`Круглое число. Такие годы запоминаются.`],
+ factors:(n,d)=>[`${n} = ${d.f.join(' × ')}`,`Разложено на простые множители.`]}
+};
+
+/* ---- facts that are not arithmetic -------------------------------------
+   Number theory is a lovely thing to say to a mathematician and a strange
+   thing to say to a nurse. These are all computed from the age too, so they
+   are still different for every card - only the lens changes.
+
+   The constants are honest averages, and the copy says "about" everywhere:
+   70 beats a minute, 16,000 spoken words a day, a 940-million-km orbit. */
+const YEAR_DAYS=365.2425;
+const PER_YEAR={
+  heart:70*60*24*YEAR_DAYS,      // ~36.8 million beats
+  words:16000*YEAR_DAYS,         // ~5.8 million words
+  orbitKm:939964521,             // one lap of the Earth's orbit
+};
+
+/** Large numbers the way each language actually groups them. */
+const BIG={
+  uz:n=>n>=1e9?`${(n/1e9).toFixed(1).replace('.',',')} mlrd`
+      :n>=1e6?`${Math.round(n/1e6)} mln`:Math.round(n).toLocaleString('en-US').replace(/,/g,' '),
+  en:n=>n>=1e9?`${(n/1e9).toFixed(1)} billion`
+      :n>=1e6?`${Math.round(n/1e6)} million`:Math.round(n).toLocaleString('en-US'),
+  ru:n=>n>=1e9?`${(n/1e9).toFixed(1).replace('.',',')} млрд`
+      :n>=1e6?`${Math.round(n/1e6)} млн`:Math.round(n).toLocaleString('en-US').replace(/,/g,' '),
+  // Korean groups by 만 (10^4) and 억 (10^8), not by thousands.
+  ko:n=>n>=1e8?`${(n/1e8).toFixed(1).replace(/\.0$/,'')}억`
+      :n>=1e4?`${Math.round(n/1e4)}만`:Math.round(n).toLocaleString('en-US'),
+};
+
+const OTHER_FACTS={
+ code:(n,L)=>[`${n} = 0b${n.toString(2)} = 0x${n.toString(16).toUpperCase()}`,{
+   uz:`Ikkilik va o‘n oltilik sanoqda. Sening kasbing shu ikkisida gapiradi.`,
+   en:`Binary and hexadecimal. Your trade speaks in both.`,
+   ko:`2진수와 16진수. 당신의 일이 쓰는 언어죠.`,
+   ru:`Двоичное и шестнадцатеричное. Ваша работа говорит на этих двух.`}[L]],
+ heart:(n,L)=>[`${BIG[L](n*PER_YEAR.heart)}`,{
+   uz:`Yuragingiz taxminan shuncha marta urdi. Bir marta ham so‘ramay.`,
+   en:`That is roughly how many times your heart has beaten. Without being asked once.`,
+   ko:`지금까지 심장이 뛴 횟수입니다. 한 번도 묻지 않고요.`,
+   ru:`Примерно столько раз стукнуло сердце. Ни разу не спросив.`}[L]],
+ words:(n,L)=>[`${BIG[L](n*PER_YEAR.words)}`,{
+   uz:`Taxminan shuncha so‘z aytgansiz. Ba’zilari esda qolgan.`,
+   en:`About that many words spoken. A few of them stuck.`,
+   ko:`지금까지 한 말의 수입니다. 그중 몇 마디는 남았고요.`,
+   ru:`Примерно столько слов сказано. Некоторые запомнились.`}[L]],
+ orbit:(n,L)=>[`${BIG[L](n*PER_YEAR.orbitKm)} ${{uz:'km',en:'km',ko:'km',ru:'км'}[L]}`,{
+   uz:`Quyosh atrofida ${n} marta aylandingiz. Bir joydan jilmay turib.`,
+   en:`${n} laps around the sun. Without leaving the room.`,
+   ko:`태양 둘레를 ${n}바퀴 돌았습니다. 자리에서 움직이지 않고요.`,
+   ru:`${n} оборотов вокруг Солнца. Не вставая с места.`}[L]],
+ seasons:(n,L)=>[`${n}`,{
+   uz:`Shuncha bahor ko‘rdingiz. Har biri boshqacha edi.`,
+   en:`That many springs. No two of them alike.`,
+   ko:`그만큼의 봄을 지나왔습니다. 같은 봄은 하나도 없었죠.`,
+   ru:`Столько вёсен позади. И ни одной одинаковой.`}[L]],
+ sleep:(n,L)=>[`${(n/3).toFixed(1).replace(/\.0$/,'')}`,{
+   uz:`Taxminan shuncha yilni uyquda o‘tkazdingiz. Afsuslanadigan joyi yo‘q.`,
+   en:`Roughly that many years asleep. No regrets there.`,
+   ko:`대략 그만큼의 시간을 잠으로 보냈습니다. 아까울 것 없죠.`,
+   ru:`Примерно столько лет во сне. И не жаль.`}[L]],
+};
+
+/** Which lens suits which trade, strongest first. */
+const FIELD_PREF={
+  tech:['code','number','orbit'],
+  math:['number','code','orbit'],
+  medicine:['heart','sleep','orbit'],
+  education:['words','seasons','orbit'],
+  arts:['seasons','orbit','sleep'],
+  sport:['heart','orbit','sleep'],
+  business:['orbit','number','words'],
+  other:['orbit','number','seasons'],
+};
+
+/** Returns [headline, explanation] for the age, or null when there is nothing to say. */
+function ageFact(n,lang,field){
+  if(!n||n<2) return null;
+  const L=BIG[lang]?lang:'uz';
+  const numeric=numberFact(n);
+  // Plain factorisation is the dull end of number theory; only let it through
+  // when nothing better is on offer.
+  const numberIsInteresting=numeric&&numeric.kind!=='factors';
+
+  for(const kind of (FIELD_PREF[field]||FIELD_PREF.other)){
+    if(kind==='number'){
+      if(!numberIsInteresting) continue;
+      const table=FACT_COPY[L]||FACT_COPY.uz;
+      return {kind,lines:table[numeric.kind](n,numeric)};
+    }
+    const made=OTHER_FACTS[kind];
+    if(made) return {kind,lines:made(n,L)};
+  }
+  const table=FACT_COPY[L]||FACT_COPY.uz;
+  return {kind:'number',lines:table[numeric.kind](n,numeric)};
+}
+
+/* ======================= the letter =======================
+   Two rules decide the phrasing here.
+
+   First: the sender's own words come first and the frame follows, so a line
+   reads "matematika — bu ham sening bir qisming" rather than
+   "Qiziqishlari: matematika". A colon introducing a fact is what a form does;
+   a letter does not, and five of them in a row was the loudest tell.
+
+   Second: beats are grouped into four paragraphs of deliberately uneven
+   length - a short opening, one long paragraph carrying the memory, a short
+   turn, and the wish. Seven paragraphs of twelve words each read like a
+   report however good the sentences are.
+
+   Uzbek and Russian take their register from the relationship (sen/siz,
+   ты/вы). Korean stays in 해요체 throughout.                               */
+
+const END='.!?…。！？';
+const sent=t=>{t=(t||'').trim();return !t||END.includes(t.slice(-1))?t:t+'.'};
+const bare=t=>sent(t).replace(/[.。]$/,'');
+// Mid-sentence form. It deliberately does NOT lower the first letter: there
+// is no way to tell "universitet" from "Toshkent", and demoting a proper noun
+// is a worse mistake than leaving a common one capitalised.
+const low=t=>bare(t);
+const cap=t=>{t=bare(t);return t.charAt(0).toUpperCase()+t.slice(1)};
+const inf=d=>d.relation==='friend'||d.relation==='classmate';
+const words=s=>s.trim().split(/\s+/).filter(Boolean).length;
+
+/** Uzbek locative, without doubling a suffix the sender already typed. */
+const locative=t=>{
+  const w=cap(t);
+  return /(da|de)$/i.test(w) ? w : `${w}da`;
+};
+
+const POOLS={
+uz:{
+ open:[
+  d=>d.age?`${d.name}, ${d.age}.`:`${d.name}.`,
+  d=>inf(d)?`${d.name}, bugun sen ${d.age?d.age+' ':''}yoshga to‘lding.`
+           :`${d.name}, bugun siz ${d.age?d.age+' ':''}yoshga to‘ldingiz.`,
+  d=>d.age?`${d.age} yosh. ${d.name}, bugungi kun ${inf(d)?'seniki':'sizniki'}.`
+          :`${d.name}, bugungi kun ${inf(d)?'seniki':'sizniki'}.`],
+ recognise:[
+  d=>`${cap(d.traits)} — ${inf(d)?'seni':'sizni'} bilganlar shunday deyishadi, va men ham shu fikrdaman.`,
+  d=>`${cap(d.traits)} — ${inf(d)?'sen haqingda':'siz haqingizda'} birinchi aytiladigan gap shu.`,
+  d=>`${cap(d.traits)}. Yillar davomida bu o‘zgarmadi.`],
+ likes:[
+  d=>`Yana ${low(d.likes)} bor — busiz ${inf(d)?'seni':'sizni'} tasavvur qilib bo‘lmaydi.`,
+  d=>`${cap(d.likes)} ham shunga qo‘shiladi.`],
+ memoryLead:[
+  d=>inf(d)?`Esingdami, ${low(d.memory)}.`:`Esingizdami, ${low(d.memory)}.`,
+  d=>`Hali ham esimda, ${low(d.memory)}.`,
+  d=>`Shu kunlarda tez-tez esimga tushadi — ${low(d.memory)}.`],
+ memoryTurn:[
+  'O‘shanda bunga e’tibor bermagandim, endi beraman.',
+  'Kichik narsa edi, lekin esda qoladigani shunaqa bo‘larkan.',
+  'Oradan vaqt o‘tdi, o‘sha kun esa joyida turibdi.'],
+ acquaint:{
+  both:d=>`${locative(d.met)} boshlangan tanishuvimizga ${d.years} yil bo‘libdi.`,
+  place:d=>`Hammasi ${locative(d.met)} boshlangan edi.`,
+  years:d=>`${d.years} yildan beri tanishamiz — oz muddat emas.`},
+ gratitude:[
+  d=>`${cap(d.gratitude)} — buni aytmasam bo‘lmaydi.`,
+  d=>`${cap(d.gratitude)}. Buning uchun rahmat.`],
+ unsaid:[
+  d=>`${cap(d.unsaid)} — buni hech aytmagandim.`,
+  d=>`${cap(d.unsaid)}. Aytilmay qolgan gap shu edi.`],
+ bond:{
+  friend:['Masofa ko‘p narsani o‘zgartiradi, do‘stlikni emas.',
+          'Qancha uzoq bo‘lsak ham, sen hamon o‘sha odamsan.'],
+  classmate:['Bir partada o‘tirgan kunlar uzoqda qoldi, lekin unutilmadi.',
+             'Maktab tugadi, sinfdoshlik tugamadi.'],
+  colleague:['Siz bilan ishlash oson — bu kam uchraydigan narsa.',
+             'Hamkasb deyish kam, siz ko‘proq odamsiz.'],
+  family:['Oilani tanlab bo‘lmaydi, lekin men omadim kelgan deb bilaman.',
+          'Siz bilan bir oilada bo‘lish — tasodif emas.'],
+  other:['Hayot ko‘p odamni ro‘para qiladi, siz esda qolganlardansiz.',
+         'Ba’zi odamlar shunchaki tanish bo‘lib qolmaydi. Siz shundaysiz.']},
+ noFacts:[
+  'Yillar o‘tadi, odam esa o‘zi bo‘lib qolaveradi.',
+  'Bir yil yana ortda qoldi, va ortga qarasa arzigulik ish ko‘p.',
+  'Tug‘ilgan kun hisob-kitob kuni emas, shunchaki yaxshi kun.'],
+ wish:{
+  warm:[d=>inf(d)?'Yangi yoshing yengil kelsin — sog‘lik, tinchlik va o‘zingga yoqadigan ish.'
+                 :'Yangi yoshingiz yengil kelsin — sog‘lik, tinchlik va o‘zingizga yoqadigan ish.',
+        d=>inf(d)?'Bu yil senga shoshilmaslikni va xotirjamlikni olib kelsin.'
+                 :'Bu yil sizga shoshilmaslikni va xotirjamlikni olib kelsin.',
+        d=>'Sog‘lik tilayman, qolgani o‘zi keladi.'],
+  funny:[d=>'Yosh oshdi, lekin tort ham bor — ayirboshlash yomon emas.',
+         d=>'Shamlar ko‘paydi, tort o‘sha-o‘sha. Adolatsiz, lekin mazali.',
+         d=>`${d.age?d.age+' — ':''}hali yosh, shunday deb kelishamiz.`],
+  formal:[d=>'Sizga mustahkam salomatlik, oilangizga tinchlik va ishlaringizga barqarorlik tilayman.',
+          d=>'Yangi yoshingiz sog‘liq va ezgu natijalar bilan o‘tsin.',
+          d=>'Boshlagan har bir ishingiz o‘z samarasini bersin.'],
+  short:[d=>'Sog‘lik va omad.',d=>inf(d)?'Baxtli bo‘l.':'Baxtli bo‘ling.']},
+ next:[d=>`Kelasi safar ${low(d.next)}.`,d=>`${cap(d.next)} — shuni rejaga qo‘yaylik.`],
+ coda:[
+  d=>inf(d)?'Va bir kun yana bir stolda o‘tiraylik.':'Va bir kun albatta ko‘rishaylik.',
+  d=>inf(d)?'Tug‘ilgan kuning bilan.':'Tug‘ilgan kuningiz bilan.',
+  d=>inf(d)?'Shamlarni puflashni unutma.':'Shamlarni puflashni unutmang.']},
+
+en:{
+ open:[
+  d=>d.age?`${d.name}, ${d.age}.`:`${d.name}.`,
+  d=>`${d.name}, you are ${d.age??''} today.`.replace(' ,',',').replace('  ',' '),
+  d=>d.age?`${d.age}. ${d.name}, today belongs to you.`:`${d.name}, today belongs to you.`],
+ recognise:[
+  d=>`${cap(d.traits)} — that is what everyone says about you, and they are right.`,
+  d=>`${cap(d.traits)} — it is the first thing anyone reaches for.`,
+  d=>`${cap(d.traits)}. Years have not moved that.`],
+ likes:[
+  d=>`And ${low(d.likes)}, without which you would not quite be you.`,
+  d=>`Add ${low(d.likes)} to that list as well.`],
+ memoryLead:[
+  d=>`Do you remember, ${low(d.memory)}.`,
+  d=>`I still picture it — ${low(d.memory)}.`,
+  d=>`It comes back to me often, ${low(d.memory)}.`],
+ memoryTurn:[
+  'I did not pay attention then. I do now.',
+  'It was a small thing, and the small things are what stay.',
+  'Years have gone by and that day has not moved.'],
+ acquaint:{
+  both:d=>`It started at ${low(d.met)}, ${d.years} years ago now.`,
+  place:d=>`All of it started at ${low(d.met)}.`,
+  years:d=>`${d.years} years of knowing you, which is not a short run.`},
+ gratitude:[
+  d=>`${cap(d.gratitude)} — that needs saying out loud.`,
+  d=>`${cap(d.gratitude)}. Thank you for that.`],
+ unsaid:[
+  d=>`${cap(d.unsaid)} — and I never actually said so.`,
+  d=>`${cap(d.unsaid)}. That is the part that went unsaid.`],
+ bond:{
+  friend:['Distance changes a lot of things, but not this one.',
+          'However far apart we end up, you are still you.'],
+  classmate:['Those desks are long behind us, and still right there.',
+             'School ended. Being your classmate did not.'],
+  colleague:['Working with you is easy, and that is rarer than people admit.',
+             'Colleague is too small a word for it.'],
+  family:['Nobody picks their family. I came out ahead.',
+          'Being in the same family as you was never just luck.'],
+  other:['Life puts a lot of people in front of you, and you stayed.',
+         'Some people do not stay acquaintances. You are one.']},
+ noFacts:[
+  'Years pass and a person stays themselves.',
+  'Another year behind you, and plenty of it was worth doing.',
+  'A birthday is not an audit. It is just a good day.'],
+ wish:{
+  warm:[d=>'May this year come easy — health, a quiet mind, work you actually like.',
+        d=>'I hope this year brings you less hurry and more of what you want.',
+        d=>'Health first. The rest tends to follow on its own.'],
+  funny:[d=>'You are older, and there is cake. On balance, a fair trade.',
+         d=>'More candles, same size cake. Unfair, but delicious.',
+         d=>`${d.age?d.age+' is ':''}still young, and we have agreed on this.`],
+  formal:[d=>'Wishing you good health, peace at home, and steady success in everything you undertake.',
+          d=>'May this year bring you health, prosperity and work you are proud of.',
+          d=>'May every undertaking of yours bear its proper fruit.'],
+  short:[d=>'Health and luck.',d=>'Be well.']},
+ next:[d=>`Next time, ${low(d.next)}.`,d=>`${cap(d.next)} — let us put that in the diary.`],
+ coda:[
+  d=>'And one day, the same table again.',
+  d=>'Happy birthday.',
+  d=>'Do not forget the candles.']},
+
+ko:{
+ open:[
+  d=>d.age?`${d.name}님, ${d.age}.`:`${d.name}님.`,
+  d=>d.age?`${d.name}님, 오늘 ${d.age}세가 되셨네요.`:`${d.name}님, 오늘은 당신의 날입니다.`,
+  d=>d.age?`${d.age}세. ${d.name}님, 오늘은 온전히 당신의 날입니다.`
+          :`${d.name}님, 오늘은 온전히 당신의 날입니다.`],
+ recognise:[
+  d=>`${bare(d.traits)} — 다들 그렇게 말하고, 저도 같은 생각입니다.`,
+  d=>`${bare(d.traits)} — 당신을 두고 가장 먼저 나오는 말입니다.`,
+  d=>`${bare(d.traits)}. 오랜 시간 변하지 않더군요.`],
+ likes:[
+  d=>`거기에 ${bare(d.likes)}까지 더하면, 비로소 당신입니다.`,
+  d=>`${bare(d.likes)}도 빼놓을 수 없고요.`],
+ memoryLead:[
+  d=>`기억하세요, ${bare(d.memory)}.`,
+  d=>`아직도 눈에 선합니다 — ${bare(d.memory)}.`,
+  d=>`요즘 자주 떠오릅니다. ${bare(d.memory)}.`],
+ memoryTurn:[
+  '그때는 몰랐습니다. 지금은 압니다.',
+  '사소한 일이었지만, 남는 건 늘 그런 것들입니다.',
+  '시간은 흘렀는데 그날만 그대로입니다.'],
+ acquaint:{
+  both:d=>`${bare(d.met)}에서 시작된 인연이 벌써 ${d.years}년입니다.`,
+  place:d=>`모든 게 ${bare(d.met)}에서 시작됐죠.`,
+  years:d=>`알고 지낸 지 ${d.years}년, 짧은 시간이 아닙니다.`},
+ gratitude:[
+  d=>`${bare(d.gratitude)} — 이건 꼭 말해야겠습니다.`,
+  d=>`${bare(d.gratitude)}. 그 점 고맙습니다.`],
+ unsaid:[
+  d=>`${bare(d.unsaid)} — 한 번도 말한 적이 없네요.`,
+  d=>`${bare(d.unsaid)}. 그게 끝내 못 한 말이었습니다.`],
+ bond:{
+  friend:['거리는 많은 걸 바꾸지만, 이건 바꾸지 못합니다.',
+          '아무리 멀어져도 당신은 여전히 당신입니다.'],
+  classmate:['그 책상은 멀어졌는데, 여전히 가까이 있습니다.',
+             '학교는 끝났지만 동창인 건 끝나지 않았습니다.'],
+  colleague:['당신과 일하는 건 편합니다. 생각보다 드문 일이죠.',
+             '동료라는 말로는 조금 부족합니다.'],
+  family:['가족은 고를 수 없죠. 저는 운이 좋았습니다.',
+          '같은 가족이라는 건 우연만은 아니었습니다.'],
+  other:['살면서 많은 사람을 만나는데, 당신은 남았습니다.',
+         '그냥 아는 사이로 끝나지 않는 사람이 있습니다. 당신이 그렇습니다.']},
+ noFacts:[
+  '세월은 흘러도 사람은 자기 자신으로 남습니다.',
+  '또 한 해를 보냈고, 돌아보면 해볼 만한 일이 많았습니다.',
+  '생일은 결산하는 날이 아니라 그냥 좋은 날입니다.'],
+ wish:{
+  warm:[d=>'올 한 해가 가볍기를 바랍니다. 건강, 편안한 마음, 그리고 정말 좋아하는 일.',
+        d=>'덜 서두르고 원하는 것에 더 가까운 한 해가 되기를 바랍니다.',
+        d=>'우선 건강하세요. 나머지는 대개 따라옵니다.'],
+  funny:[d=>'한 살 더 먹었지만 케이크가 있으니 괜찮은 거래입니다.',
+         d=>'초는 늘고 케이크는 그대로. 불공평하지만 맛있죠.',
+         d=>`${d.age?d.age+'세, ':''}아직 젊습니다. 그렇게 하기로 합시다.`],
+  formal:[d=>'건강과 가정의 평안, 그리고 하시는 모든 일에 꾸준한 성취가 함께하기를 기원합니다.',
+          d=>'새로운 한 해가 건강과 보람으로 가득하기를 바랍니다.',
+          d=>'시작하시는 모든 일이 좋은 결실을 맺기를 바랍니다.'],
+  short:[d=>'건강과 행운을 빕니다.',d=>'건강하세요.']},
+ next:[d=>`다음엔 ${bare(d.next)}.`,d=>`${bare(d.next)} — 그렇게 약속해 둡시다.`],
+ coda:[
+  d=>'언젠가 다시 같은 자리에서 뵙기를.',
+  d=>'생일 축하합니다.',
+  d=>'촛불 끄는 것 잊지 마세요.']},
+
+ru:{
+ open:[
+  d=>d.age?`${d.name}, ${d.age}.`:`${d.name}.`,
+  d=>inf(d)?`${d.name}, тебе сегодня ${d.age??''}.`.replace(' .','.')
+           :`${d.name}, вам сегодня ${d.age??''}.`.replace(' .','.'),
+  d=>d.age?`${d.age}. ${d.name}, этот день ${inf(d)?'твой':'ваш'}.`
+          :`${d.name}, этот день ${inf(d)?'твой':'ваш'}.`],
+ recognise:[
+  d=>`${cap(d.traits)} — так о ${inf(d)?'тебе':'вас'} и говорят, и это правда.`,
+  d=>`${cap(d.traits)} — первое, что приходит на ум.`,
+  d=>`${cap(d.traits)}. И это не меняется годами.`],
+ likes:[
+  d=>`А ещё ${low(d.likes)} — без этого ${inf(d)?'тебя':'вас'} не представить.`,
+  d=>`${cap(d.likes)} сюда же.`],
+ memoryLead:[
+  d=>inf(d)?`Помнишь, ${low(d.memory)}.`:`Помните, ${low(d.memory)}.`,
+  d=>`До сих пор стоит перед глазами — ${low(d.memory)}.`,
+  d=>`В последнее время часто вспоминаю, ${low(d.memory)}.`],
+ memoryTurn:[
+  'Тогда я не придал этому значения. Теперь придаю.',
+  'Мелочь, а остаётся почему-то именно такое.',
+  'Времени прошло много, а тот день стоит на месте.'],
+ acquaint:{
+  both:d=>`Место, с которого всё началось, — ${low(d.met)}. С тех пор ${d.years} лет.`,
+  place:d=>`Место, с которого всё началось, — ${low(d.met)}.`,
+  years:d=>`${d.years} лет знакомства — срок немаленький.`},
+ gratitude:[
+  d=>`${cap(d.gratitude)} — об этом надо сказать вслух.`,
+  d=>`${cap(d.gratitude)}. Спасибо за это.`],
+ unsaid:[
+  d=>`${cap(d.unsaid)} — и я так этого и не сказал.`,
+  d=>`${cap(d.unsaid)}. Вот что осталось несказанным.`],
+ bond:{
+  friend:['Расстояние меняет многое, но не это.',
+          'Как бы далеко ни разнесло, ты остаёшься собой.'],
+  classmate:['Те парты давно позади и всё ещё рядом.',
+             'Школа закончилась. Быть одноклассниками — нет.'],
+  colleague:['С вами легко работать, а это реже, чем принято думать.',
+             'Слово «коллега» тут маловато.'],
+  family:['Семью не выбирают. Мне повезло.',
+          'Быть с вами одной семьёй — не только случайность.'],
+  other:['Жизнь сводит со многими, а вы остались.',
+         'Некоторые не остаются просто знакомыми. Вы из таких.']},
+ noFacts:[
+  'Годы идут, а человек остаётся собой.',
+  'Ещё один год позади, и многое в нём стоило сделать.',
+  'День рождения — не отчёт. Просто хороший день.'],
+ wish:{
+  warm:[d=>'Пусть год будет лёгким — здоровье, спокойная голова и работа, которая правда нравится.',
+        d=>inf(d)?'Пусть в этом году будет меньше спешки и больше того, чего ты хочешь.'
+                 :'Пусть в этом году будет меньше спешки и больше того, чего вы хотите.',
+        d=>'Здоровья в первую очередь. Остальное обычно подтягивается.'],
+  funny:[d=>`${inf(d)?'Ты стал'+(d.gender==='female'?'а':''):'Вы стали'} старше, зато есть торт. Сделка неплохая.`,
+         d=>'Свечей больше, торт тот же. Несправедливо, но вкусно.',
+         d=>`${d.age?d.age+' — ':''}это ещё молодость, так и договоримся.`],
+  formal:[d=>'Желаю крепкого здоровья, мира в доме и устойчивых успехов во всех начинаниях.',
+          d=>'Пусть новый год принесёт здоровье, благополучие и работу, которой можно гордиться.',
+          d=>'Пусть каждое начатое дело принесёт свой результат.'],
+  short:[d=>'Здоровья и удачи.',d=>inf(d)?'Будь здоров.':'Будьте здоровы.']},
+ next:[d=>`В следующий раз ${low(d.next)}.`,d=>`${cap(d.next)} — давай${inf(d)?'':'те'} это запишем.`],
+ coda:[
+  d=>'И однажды — снова за одним столом.',
+  d=>'С днём рождения.',
+  d=>inf(d)?'Не забудь задуть свечи.':'Не забудьте задуть свечи.']}
+};
+
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+
+function writeLetter(d){
+  d=d.nick?{...d,name:d.nick}:d;
+  const P=POOLS[d.lang]||POOLS.uz;
+  const seed=hash(`${d.name}|${d.age}|${d.from}|${d.lang}|${d.traits}|${d.likes}|${d.memory}|${d.tone}|${d.relation}|${d.unsaid}`);
+  const pick=(a,sh)=>a[(seed>>>sh)%a.length];
+  const run=x=>typeof x==='function'?x(d):x;
+
+  const wish=run(pick(P.wish[d.tone]||P.wish.warm,20));
+  const nextLine=d.next?run(pick(P.next,30)):'';
+  const coda=run(pick(d.next?P.coda.slice(1):P.coda,28));
+  const closing=[wish,nextLine,coda].filter(Boolean).join(' ');
+
+  // The opening is deliberately the shortest line in the letter: the jolt of
+  // a two-word paragraph is what makes the long one after it land.
+  const opening=run(pick(P.open,0));
+  if(d.tone==='short') return [opening,closing];
+
+  // --- the long paragraph: who they are, and the moment ------------------
+  const body=[];
+  if(d.traits){
+    body.push(run(pick(P.recognise,4)));
+    if(d.likes) body.push(run(pick(P.likes,8)));
+  } else if(d.likes){
+    body.push(run(pick(P.likes,8)));
+  }
+  if(d.memory){
+    body.push(run(pick(P.memoryLead,12)));
+    body.push(run(pick(P.memoryTurn,16)));
+  }
+  if(!body.length) body.push(run(pick(P.noFacts,4)));
+
+  // --- the turn: the one thing that is hardest to say --------------------
+  const turn=[];
+  if(d.unsaid) turn.push(run(pick(P.unsaid,24)));
+  else if(d.gratitude) turn.push(run(pick(P.gratitude,24)));
+  if(d.met||d.years)
+    turn.push(run(d.met&&d.years?P.acquaint.both:d.met?P.acquaint.place:P.acquaint.years));
+  if(!turn.length) turn.push(run(pick(P.bond[d.relation]||P.bond.other,24)));
+
+  const paras=[opening,body.join(' '),turn.join(' '),closing];
+
+  // Four paragraphs is the shape; the budget only decides how full the long
+  // one gets, by dropping its last sentence rather than a whole beat.
+  while(words(paras.join(' '))>115 && body.length>1){
+    body.pop();
+    paras[1]=body.join(' ');
+  }
+  return paras;
+}
+
+/* ============================ state & helpers ============================ */
+let LANG='uz';
+const $=id=>document.getElementById(id);
+const t=k=>COPY[LANG][k]??k;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+const primes=n=>{const f=[];let r=n,d=2;while(d*d<=r){while(r%d===0){f.push(d);r/=d}d+=d===2?1:2}if(r>1)f.push(r);return f};
+const group=n=>n.toLocaleString('en-US').replace(/,/g,' ');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const candleCount=a=>Math.min(Math.max(a||1,1),100);
+
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t)});
+  $('lbl-way').textContent=t('bar.way');
+  document.querySelector('label.lbl').textContent=t('bar.lang');
+  if(!$('screen-card').hidden) syncBlowButton();
+  $('c-copy').textContent=t('copy');
+  $('c-again').textContent=t('again');
+  $('c-expiry').textContent=t('expires');
+  $('pv-greet').textContent=t('happy');
+  refreshPreview();
+}
+
+/* ============================ live preview ============================ */
+function fillCandles(box,n,withSmoke){
+  box.textContent='';
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');c.className='candle';
+    c.innerHTML='<span class="flame"></span>'+(withSmoke?'<span class="smoke"></span>':'')+'<span class="stick"></span>';
+    box.appendChild(c);
+  }
+}
+const OPTIONAL=['nick','traits','likes','met','years','memory','gratitude','unsaid','next'];
+// `field` and `gender` are selects with a default, so they count only when moved.
+
+function readForm(){
+  const f=$('create');
+  const num=k=>{const v=parseInt(f[k].value,10);return Number.isFinite(v)?v:null};
+  const str=k=>f[k].value.trim();
+  return{lang:LANG,way:document.documentElement.dataset.way,
+    name:str('name'),age:num('age'),
+    gender:f.gender.value,relation:f.relation.value,from:str('from'),
+    field:f.field.value,
+    nick:str('nick'),traits:str('traits'),likes:str('likes'),
+    met:str('met'),years:num('years'),memory:str('memory'),
+    gratitude:str('gratitude'),unsaid:str('unsaid'),next:str('next'),
+    tone:f.tone.value};
+}
+
+/** How much of the optional detail is filled in, 0-10. */
+function filledCount(d){
+  let n=OPTIONAL.filter(k=>d[k]).length;
+  if(d.gender!=='unspecified') n++;
+  if(d.field!=='other') n++;
+  return n;
+}
+function refreshPreview(){
+  const d=readForm();
+  $('pv-name').textContent=d.name||'—';
+  const ok=d.age&&d.age>0&&d.age<130;
+  $('pv-age').hidden=!ok;$('pv-age').textContent=ok?d.age:'';
+  fillCandles($('pv-candles'),ok?Math.min(d.age,30):0,false);
+  const bits=[];
+  if(ok)bits.push(`${candleCount(d.age)} ${t('pvCandles')}`);
+  if(d.traits)bits.push(d.traits);
+  if(d.likes)bits.push(d.likes);
+  if(d.met)bits.push(d.met);
+  $('pv-summary').textContent=bits.length?bits.join(' · '):t('pvEmpty');
+  $('count-memory').textContent=`${$('f-memory').value.length}/220`;
+
+  const n=filledCount(d);
+  $('meter-fill').style.width=`${Math.min(100,n*100/11)}%`;
+  $('meter-text').textContent=n===10?t('meterFull')
+    :`${t('meter').replace('{n}',n)} — ${t('meterHint')}`;
+}
+
+/* ============================ card render ============================ */
+let lit=true;
+function renderCard(d){
+  const n=candleCount(d.age);
+  $('c-age').textContent=d.age??'';
+  $('c-age').hidden=!d.age;
+  $('c-age').setAttribute('aria-label',d.age??'');
+  $('c-greet').textContent=t('happy');
+  $('c-name').textContent=d.name;
+
+  fillCandles($('c-candles'),n,true);
+  $('c-candles').setAttribute('aria-label',`${n} ${t('lit')}`);
+  lit=true;syncBlowButton();
+
+  $('c-letter').innerHTML=writeLetter(d).map(p=>`<p>${esc(p)}</p>`).join('')
+    +(d.from?`<p class="sign">${esc(t('from')+d.from)}</p>`:'');
+
+  if(d.age){
+    $('c-ledger').hidden=false;
+    $('c-ledger').innerHTML=
+      `<div><b>${d.age}</b><span>${esc(t('years'))}</span></div>`+
+      `<div><b>${group(d.age*12)}</b><span>${esc(t('months'))}</span></div>`+
+      `<div><b>${group(Math.round(d.age*365.2425))}</b><span>${esc(t('days'))}</span></div>`;
+    const fact=ageFact(d.age,LANG,d.field);
+    $('c-math').hidden=!fact;
+    if(fact){
+      $('c-math-title').textContent=t('fact.'+fact.kind);
+      $('c-eq').textContent=fact.lines[0];
+      $('c-math-note').textContent=fact.lines[1];
+    }
+  }else{$('c-ledger').hidden=true;$('c-math').hidden=true}
+
+  const id=Array.from({length:9},()=>'23456789bcdfghjkmnpqrstvwxyz'[Math.random()*28|0]).join('');
+  $('c-link').textContent=`https://151-145-79-228.sslip.io/c/${id}`;
+  $('c-expiry').textContent=t('expires');
+
+  $('screen-form').hidden=true;$('screen-card').hidden=false;
+  scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+}
+
+/* ============================ form ============================ */
+$('create').addEventListener('input',refreshPreview);
+$('create').addEventListener('submit',e=>{
+  e.preventDefault();
+  const d=readForm();const err=$('err');err.hidden=true;
+  if(d.name.replace(/\s/g,'').length<2){err.textContent=t('errName');err.hidden=false;$('f-name').focus();return}
+  if($('f-age').value&&(d.age===null||d.age<1||d.age>129)){err.textContent=t('errAge');err.hidden=false;$('f-age').focus();return}
+  renderCard(d);
+});
+$('c-again').addEventListener('click',()=>{
+  $('screen-card').hidden=true;$('screen-form').hidden=false;
+  scrollTo({top:0,behavior:reduce?'auto':'smooth'});$('f-name').focus();
+});
+$('c-copy').addEventListener('click',async e=>{
+  try{await navigator.clipboard.writeText($('c-link').textContent);
+    e.target.textContent=t('copied');setTimeout(()=>e.target.textContent=t('copy'),1600)}
+  catch{const r=document.createRange();r.selectNodeContents($('c-link'));
+    getSelection().removeAllRanges();getSelection().addRange(r)}
+});
+
+/* ============================ bar ============================ */
+$('lang-select').addEventListener('change',e=>{
+  LANG=e.target.value;
+  applyLang();
+  if(!$('screen-card').hidden)renderCard(readForm());
+});
+document.querySelectorAll('[data-way]').forEach(b=>b.addEventListener('click',()=>{
+  document.documentElement.dataset.way=b.dataset.way;
+  document.querySelectorAll('[data-way]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));
+}));
+
+/* ============================ sky, confetti, melody ============================ */
+const sky=$('sky'),sctx=sky.getContext('2d');let stars=[];
+function sizeSky(){const r=devicePixelRatio||1;sky.width=innerWidth*r;sky.height=innerHeight*r;
+  sctx.setTransform(r,0,0,r,0,0);
+  stars=Array.from({length:Math.round(innerWidth*innerHeight/9000)},()=>
+    ({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.2+.2,p:Math.random()*6.28}))}
+const lumOf=c=>(.2126*c[0]+.7152*c[1]+.0722*c[2])/255;
+function drawSky(ts){const h=css('--paper').replace('#','');
+  const rgb=[0,2,4].map(i=>parseInt(h.substr(i,2),16));
+  /* Dark specks on a cream sheet read as dirt at full strength; damp them. */
+  const k=lumOf(rgb)<.5?.3:1;
+  sctx.clearRect(0,0,innerWidth,innerHeight);
+  for(const s of stars){const a=(reduce?.6:.35+.35*Math.sin(ts/900+s.p))*k;
+    sctx.fillStyle=`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
+    sctx.beginPath();sctx.arc(s.x,s.y,s.r,0,6.28);sctx.fill()}
+  if(!reduce)requestAnimationFrame(drawSky)}
+sizeSky();requestAnimationFrame(drawSky);
+
+const cf=$('confetti'),cctx=cf.getContext('2d');let bits=[],running=false;
+function sizeConf(){const r=devicePixelRatio||1;cf.width=innerWidth*r;cf.height=innerHeight*r;
+  cctx.setTransform(r,0,0,r,0,0)}
+sizeConf();addEventListener('resize',()=>{sizeSky();sizeConf();if(reduce)drawSky(0)});
+function step(){cctx.clearRect(0,0,innerWidth,innerHeight);
+  for(let i=bits.length-1;i>=0;i--){const b=bits[i];
+    b.vy+=.32;b.vx*=.99;b.x+=b.vx;b.y+=b.vy;b.r+=b.vr;b.life++;
+    cctx.save();cctx.translate(b.x,b.y);cctx.rotate(b.r);cctx.fillStyle=b.c;
+    cctx.fillRect(-b.w/2,-b.h/2,b.w,b.h*Math.abs(Math.cos(b.life/8)));cctx.restore();
+    if(b.y>innerHeight+40)bits.splice(i,1)}
+  if(bits.length)requestAnimationFrame(step);else{running=false;cctx.clearRect(0,0,innerWidth,innerHeight)}}
+function burst(){const colors=css('--confetti').split(',').map(s=>s.trim());
+  for(let i=0;i<220;i++)bits.push({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*.45,
+    vx:(Math.random()-.5)*14,vy:-Math.random()*15-4,w:Math.random()*8+4,h:Math.random()*5+3,
+    r:Math.random()*6.28,vr:(Math.random()-.5)*.3,c:colors[(Math.random()*colors.length)|0],life:0});
+  if(!running){running=true;requestAnimationFrame(step)}}
+
+const N={G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99};
+const SONG=[['G4',.75],['G4',.25],['A4',1],['G4',1],['C5',1],['B4',2],
+ ['G4',.75],['G4',.25],['A4',1],['G4',1],['D5',1],['C5',2],
+ ['G4',.75],['G4',.25],['G5',1],['E5',1],['C5',1],['B4',1],['A4',2],
+ ['F5',.75],['F5',.25],['E5',1],['C5',1],['D5',1],['C5',2.5]];
+const BEAT=.42,RATE=22050;let url=null;
+const player=new Audio();player.setAttribute('playsinline','');
+function renderSong(){const secs=SONG.reduce((a,[,b])=>a+b*BEAT,0);
+  const len=Math.ceil((secs+.3)*RATE),pcm=new Int16Array(len);let at=0;
+  for(const [n,b] of SONG){const d=b*BEAT,c=Math.floor(d*RATE),per=RATE/N[n];
+    for(let i=0;i<c;i++){const s=i/RATE,ph=(i%per)/per;
+      pcm[at+i]=(4*Math.abs(ph-.5)-1)*Math.min(1,s/.02)*Math.exp(-3*s/d)*.5*32767}at+=c}
+  const buf=new ArrayBuffer(44+len*2),v=new DataView(buf);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+len*2,true);w(8,'WAVE');w(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,RATE,true);v.setUint32(28,RATE*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  w(36,'data');v.setUint32(40,len*2,true);new Int16Array(buf,44).set(pcm);
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}))}
+function play(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch{}
+  if(!url)url=renderSong();player.src=url;player.currentTime=0;player.play()?.catch(()=>{})}
+
+/** Button and hint text for whatever the candles are doing right now. */
+function syncBlowButton(){
+  const box=$('c-candles');
+  $('c-blow').textContent=lit?t('blow'):t('relight');
+  $('c-hint').textContent=lit?t('hint'):t('wished');
+  box.setAttribute('aria-label',`${box.children.length} ${lit?t('lit'):t('out')}`);
+}
+
+$('c-blow').addEventListener('click',()=>{
+  const box=$('c-candles'),n=box.children.length;
+  // Capture the target state before flipping it. Reading `lit` inside the
+  // timeout instead reads it *after* the flip below, which snuffed the
+  // candles on the second click and relit them on the first.
+  const blowingOut=lit;
+  [...box.children].forEach((c,i)=>
+    setTimeout(()=>c.classList.toggle('out',blowingOut),reduce?0:i*35));
+  if(blowingOut){setTimeout(burst,reduce?0:Math.min(600,n*35+200));play()}
+  lit=!lit;
+  syncBlowButton();
+});
+
+applyLang();
+</script>
+</body>
+</html>

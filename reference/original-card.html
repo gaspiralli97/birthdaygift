@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta property="og:title" content="Happy 30th birthday, Sahobiddin!">
+<meta property="og:description" content="Open it and blow out the candles 🎂 (sound on)">
+<meta name="robots" content="noindex">
+<title>Sahobiddin at Thirty</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one centred card on a night sky; a row of 30 candles is the hero, the letter sits below. Single dark look by choice. */
+  :root {
+    --night: #0d1526;
+    --night-2: #16223a;
+    --gold: #e9c47c;
+    --gold-soft: #b8975a;
+    --paper: #f2ede3;
+    --muted: #9aa6bd;
+    --flame: #ffb347;
+    --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+    --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+    --mono: "DM Mono", ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    background: radial-gradient(120% 80% at 50% 0%, var(--night-2) 0%, var(--night) 60%) fixed, var(--night);
+    color: var(--paper);
+    font-family: var(--serif);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 40px 56px;
+    overflow-x: hidden;
+  }
+  #sky, #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #sky { z-index: 0; }
+  #confetti { z-index: 5; }
+  main {
+    position: relative; z-index: 1;
+    max-width: 620px; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center; gap: 28px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .thirty {
+    font-family: var(--display); font-weight: 900;
+    font-size: clamp(150px, 42vw, 260px); line-height: 0.8; letter-spacing: -0.02em;
+    margin: 0;
+    background: linear-gradient(180deg, #fff3d6 0%, var(--gold) 55%, var(--gold-soft) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 6px 30px rgba(233, 196, 124, 0.25));
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 400; font-size: clamp(34px, 8vw, 52px);
+    line-height: 1.05; margin: 0; text-wrap: balance;
+  }
+  h1 em { color: var(--gold); }
+
+  /* 30 candles, three rows of ten */
+  .candles {
+    display: grid; grid-template-columns: repeat(10, 1fr); gap: 14px 10px;
+    width: 100%; max-width: 420px; padding: 8px 4px 0;
+  }
+  .candle { position: relative; height: 54px; display: flex; justify-content: center; align-items: flex-end; }
+  .candle .stick {
+    width: 8px; height: 30px; border-radius: 2px;
+    background: repeating-linear-gradient(135deg, var(--paper) 0 5px, var(--gold) 5px 9px);
+  }
+  .candle .flame {
+    position: absolute; bottom: 31px; left: 50%;
+    width: 10px; height: 18px; margin-left: -5px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: radial-gradient(circle at 50% 70%, #fff7d1 0 25%, var(--flame) 55%, rgba(255,120,40,0) 75%);
+    box-shadow: 0 0 14px 4px rgba(255, 179, 71, 0.45);
+    transform-origin: 50% 100%;
+    animation: flicker 1.6s ease-in-out infinite alternate;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .candle:nth-child(3n) .flame { animation-duration: 1.2s; }
+  .candle:nth-child(4n) .flame { animation-duration: 2s; animation-delay: -.6s; }
+  .candle .smoke {
+    position: absolute; bottom: 32px; left: 50%; width: 6px; height: 6px; margin-left: -3px;
+    border-radius: 50%; background: rgba(200, 210, 230, .5); opacity: 0;
+  }
+  .out .flame { opacity: 0; transform: scale(.2) translateY(6px); }
+  .out .smoke { animation: smoke 1.4s ease-out forwards; }
+  @keyframes flicker {
+    0% { transform: rotate(-3deg) scaleY(1); }
+    50% { transform: rotate(2deg) scaleY(1.08); }
+    100% { transform: rotate(-1deg) scaleY(.94); }
+  }
+  @keyframes smoke {
+    0% { opacity: .7; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(6px, -36px) scale(3); }
+  }
+
+  .blow {
+    font-family: var(--mono); font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--night); background: var(--gold);
+    border: 0; border-radius: 999px; padding: 15px 28px; cursor: pointer;
+    box-shadow: 0 10px 30px rgba(233, 196, 124, .25);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .blow:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(233, 196, 124, .35); }
+  .blow:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
+  .hint { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: -14px; }
+
+  .letter {
+    width: 100%; text-align: left;
+    background: rgba(242, 237, 227, 0.04);
+    border: 1px solid rgba(233, 196, 124, 0.22);
+    border-radius: 6px;
+    padding: 28px clamp(20px, 6vw, 40px);
+    font-size: 21px; line-height: 1.5;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .letter p { margin: 0; max-width: 60ch; }
+  .letter .sign { font-style: italic; color: var(--gold); text-align: right; }
+
+  .ledger {
+    width: 100%;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px;
+    background: rgba(233, 196, 124, .22); border: 1px solid rgba(233, 196, 124, .22); border-radius: 6px; overflow: hidden;
+  }
+  .ledger div { background: var(--night); padding: 16px 8px; display: flex; flex-direction: column; gap: 4px; }
+  .ledger b {
+    font-family: var(--display); font-weight: 700; font-size: clamp(26px, 7vw, 36px); color: var(--paper);
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .ledger span { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+  .math { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .math p { margin: 0; font-size: 20px; color: var(--muted); max-width: 40ch; text-wrap: balance; }
+  .math .eq { font-family: var(--display); font-weight: 700; font-size: clamp(40px, 11vw, 60px); color: var(--gold); letter-spacing: .02em; }
+  .german { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--muted); }
+  .german b { font-style: normal; font-weight: 400; color: var(--paper); }
+
+  @media (max-width: 420px) {
+    .candles { gap: 10px 6px; }
+    .letter { font-size: 19px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .candle .flame { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<main>
+  <div class="eyebrow">A birthday card for an old classmate</div>
+  <p class="thirty" aria-label="30">30</p>
+  <h1>Happy birthday,<br><em>Sahobiddin!</em></h1>
+
+  <div class="candles" id="candles" aria-label="Thirty lit candles"></div>
+  <button class="blow" id="blow" type="button">Blow out the candles</button>
+  <div class="hint" id="hint">Make a wish first. Sound on 🔊</div>
+
+  <article class="letter">
+    <p>Thirty! It feels like yesterday we were sitting in the same classroom at the lyceum, and you were the one solving olympiad problems while the rest of us were still reading the question. Now you are building your life all the way in Germany, and I could not be prouder of you.</p>
+    <p>Distance changes a lot of things, but not old friendships. You are still the same brilliant and good guy I remember from our lyceum days.</p>
+    <p>I wish you strong health, success in everything you start, and a lot of happy moments in this new decade. Your thirties are going to be your best years yet.</p>
+    <p class="sign">With respect and warm wishes,<br>your classmate Ismoil</p>
+  </article>
+
+  <section class="ledger" aria-label="Thirty years in numbers">
+    <div><b>30</b><span>years</span></div>
+    <div><b>360</b><span>months</span></div>
+    <div><b id="days">10,957</b><span>days</span></div>
+  </section>
+
+  <div class="math">
+    <div class="eyebrow">A problem for the olympiad champion</div>
+    <p class="eq">30 = 2 × 3 × 5</p>
+    <p>The product of the first three primes. A rare age for a rare mind.</p>
+  </div>
+
+  <div class="german"><b>Alles Gute zum 30. Geburtstag!</b><br>The Germans would say it like that.</div>
+</main>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Candles
+  var wrap = document.getElementById("candles");
+  for (var i = 0; i < 30; i++) {
+    var c = document.createElement("div");
+    c.className = "candle";
+    c.innerHTML = '<span class="flame"></span><span class="smoke"></span><span class="stick"></span>';
+    wrap.appendChild(c);
+  }
+
+  // Starry sky
+  var sky = document.getElementById("sky"), sctx = sky.getContext("2d"), stars = [];
+  function sizeSky() {
+    var dpr = window.devicePixelRatio || 1;
+    sky.width = innerWidth * dpr; sky.height = innerHeight * dpr;
+    sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stars = [];
+    var n = Math.round(innerWidth * innerHeight / 9000);
+    for (var i = 0; i < n; i++) stars.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 1.2 + .2, p: Math.random() * 6.28 });
+  }
+  function drawSky(t) {
+    sctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i], a = reduce ? .6 : .35 + .35 * Math.sin(t / 900 + s.p);
+      sctx.fillStyle = "rgba(242,237,227," + a + ")";
+      sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, 6.28); sctx.fill();
+    }
+    if (!reduce) requestAnimationFrame(drawSky);
+  }
+  sizeSky(); requestAnimationFrame(drawSky);
+  addEventListener("resize", function () { sizeSky(); sizeConf(); if (reduce) drawSky(0); });
+
+  // Confetti
+  var conf = document.getElementById("confetti"), cctx = conf.getContext("2d"), bits = [], running = false;
+  var colors = ["#e9c47c", "#f2ede3", "#ffb347", "#8fb3ff", "#f28b82"];
+  function sizeConf() {
+    var dpr = window.devicePixelRatio || 1;
+    conf.width = innerWidth * dpr; conf.height = innerHeight * dpr;
+    cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  sizeConf();
+  function burst() {
+    for (var i = 0; i < 220; i++) {
+      bits.push({
+        x: innerWidth / 2 + (Math.random() - .5) * 120, y: innerHeight * .45,
+        vx: (Math.random() - .5) * 14, vy: -Math.random() * 15 - 4,
+        w: Math.random() * 8 + 4, h: Math.random() * 5 + 3,
+        r: Math.random() * 6.28, vr: (Math.random() - .5) * .3,
+        c: colors[(Math.random() * colors.length) | 0], life: 0
+      });
+    }
+    if (!running) { running = true; requestAnimationFrame(stepConf); }
+  }
+  function stepConf() {
+    cctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (var i = bits.length - 1; i >= 0; i--) {
+      var b = bits[i];
+      b.vy += .32; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr; b.life++;
+      cctx.save(); cctx.translate(b.x, b.y); cctx.rotate(b.r);
+      cctx.fillStyle = b.c; cctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h * Math.abs(Math.cos(b.life / 8)));
+      cctx.restore();
+      if (b.y > innerHeight + 40) bits.splice(i, 1);
+    }
+    if (bits.length) requestAnimationFrame(stepConf); else { running = false; cctx.clearRect(0, 0, innerWidth, innerHeight); }
+  }
+
+  // "Happy Birthday" melody, rendered to a WAV and played through an <audio> element,
+  // which (unlike Web Audio) still plays when an iPhone is on silent.
+  var G4 = 392, A4 = 440, B4 = 493.88, C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99;
+  var song = [
+    [G4,.75],[G4,.25],[A4,1],[G4,1],[C5,1],[B4,2],
+    [G4,.75],[G4,.25],[A4,1],[G4,1],[D5,1],[C5,2],
+    [G4,.75],[G4,.25],[G5,1],[E5,1],[C5,1],[B4,1],[A4,2],
+    [F5,.75],[F5,.25],[E5,1],[C5,1],[D5,1],[C5,2.5]
+  ];
+  var BEAT = 0.42, RATE = 22050, songUrl = null;
+  function renderSong() {
+    var total = 0;
+    song.forEach(function (n) { total += n[1] * BEAT; });
+    var len = Math.ceil((total + 0.3) * RATE), pcm = new Int16Array(len), pos = 0;
+    song.forEach(function (n) {
+      var d = n[1] * BEAT, count = Math.floor(d * RATE), per = RATE / n[0];
+      for (var i = 0; i < count; i++) {
+        var t = i / RATE, ph = (i % per) / per;
+        var tri = 4 * Math.abs(ph - 0.5) - 1;                       // triangle wave
+        var env = Math.min(1, t / 0.02) * Math.exp(-3 * t / d);      // quick attack, soft decay
+        pcm[pos + i] = tri * env * 0.5 * 32767;
+      }
+      pos += count;
+    });
+    var buf = new ArrayBuffer(44 + len * 2), v = new DataView(buf);
+    function s(o, str) { for (var i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); }
+    s(0, "RIFF"); v.setUint32(4, 36 + len * 2, true); s(8, "WAVE"); s(12, "fmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, RATE, true); v.setUint32(28, RATE * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    s(36, "data"); v.setUint32(40, len * 2, true);
+    new Int16Array(buf, 44).set(pcm);
+    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  }
+  var player = new Audio();
+  player.setAttribute("playsinline", "");
+  function playSong() {
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    if (!songUrl) songUrl = renderSong();
+    player.src = songUrl;
+    player.currentTime = 0;
+    var p = player.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+
+  // Blow out / relight
+  var btn = document.getElementById("blow"), hint = document.getElementById("hint"), lit = true;
+  btn.addEventListener("click", function () {
+    var cs = wrap.children;
+    if (lit) {
+      for (var i = 0; i < cs.length; i++) (function (el, k) {
+        setTimeout(function () { el.classList.add("out"); }, reduce ? 0 : k * 35);
+      })(cs[i], i);
+      setTimeout(burst, reduce ? 0 : 600);
+      playSong();
+      btn.textContent = "Light them again";
+      hint.textContent = "Your wish is on its way to Germany ✨";
+      wrap.setAttribute("aria-label", "Thirty candles, blown out");
+    } else {
+      for (var j = 0; j < cs.length; j++) cs[j].classList.remove("out");
+      btn.textContent = "Blow out the candles";
+      hint.textContent = "Make a wish first. Sound on 🔊";
+      wrap.setAttribute("aria-label", "Thirty lit candles");
+    }
+    lit = !lit;
+  });
+})();
+</script>
+</body>
+</html>
