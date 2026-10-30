@@ -9,6 +9,7 @@ anything not yet marked as reported simply goes out in the next one.
 from __future__ import annotations
 
 import datetime as dt
+import html
 import logging
 from collections.abc import Sequence
 
@@ -68,7 +69,13 @@ def _ago(then: dt.datetime, now: dt.datetime) -> str:
 
 
 def _handle(event: UsageEvent) -> str:
-    return event.creator_name or f"id{event.creator_id}"
+    """A name for the sender, safe to drop into an HTML message.
+
+    Both reports go out with parse_mode=HTML, and every name in them was typed
+    by somebody: a recipient called "<b" is enough to make Telegram reject the
+    whole message, which would lose the report rather than render oddly.
+    """
+    return html.escape(event.creator_name) if event.creator_name else f"id{event.creator_id}"
 
 
 def batch_report(events: Sequence[UsageEvent]) -> str:
@@ -76,7 +83,7 @@ def batch_report(events: Sequence[UsageEvent]) -> str:
     now = dt.datetime.now(dt.UTC)
     lines = [f"<b>{len(events)} ta yangi tabriknoma</b>", ""]
     for event in events:
-        who = event.recipient + (f" ({event.age})" if event.age else "")
+        who = html.escape(event.recipient) + (f" ({event.age})" if event.age else "")
         mark = "AI" if event.source == "ai" else "qo‘lda"
         lines.append(f"{_handle(event)} → {who} · {mark} · {_ago(event.created_at, now)}")
     people = len({event.creator_id for event in events})
@@ -107,7 +114,7 @@ def weekly_report(events: Sequence[UsageEvent], session: Session) -> str:
         "",
     ]
     for own in sorted(by_person.values(), key=len, reverse=True):
-        names = ", ".join(event.recipient for event in own[:4])
+        names = ", ".join(html.escape(event.recipient) for event in own[:4])
         more = f" +{len(own) - 4}" if len(own) > 4 else ""
         lines.append(f"{_handle(own[0])} — {len(own)} ta: {names}{more}")
     lines += [

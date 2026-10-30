@@ -97,3 +97,21 @@ def test_old_events_are_eventually_dropped(settings) -> None:
         _event(session)
         assert usage.purge_old_events(session, keep_days=400) == 1
         assert len(usage.pending_batch(session)) == 1
+
+
+def test_a_name_with_markup_cannot_break_the_report(settings) -> None:
+    """Both reports go out as HTML; a "<b" in a name would reject the message."""
+    with session_scope() as session:
+        _event(session, recipient="<b>Dilnoza", creator_name="<i>@aziz")
+        batch = usage.batch_report(usage.pending_batch(session))
+        weekly = usage.weekly_report(usage.pending_weekly(session), session)
+    for text in (batch, weekly):
+        assert "<b>Dilnoza" not in text
+        assert "&lt;b&gt;Dilnoza" in text
+    assert "&lt;i&gt;@aziz" in batch
+
+
+def test_the_reports_own_markup_survives(settings) -> None:
+    with session_scope() as session:
+        _event(session)
+        assert "<b>" in usage.batch_report(usage.pending_batch(session))

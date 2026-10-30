@@ -73,3 +73,13 @@ def test_the_caps_are_checked_before_the_letter_is_written() -> None:
 
     source = inspect.getsource(bot._finish)
     assert source.index("_over_budget") < source.index("_write_letter")
+
+
+def test_a_failed_delivery_does_not_mark_the_batch_reported() -> None:
+    """Marking first would lose those ten; a duplicate is the better failure."""
+    import inspect
+
+    from birthdaygift import bot
+
+    source = inspect.getsource(bot._maybe_report)
+    assert source.index("send_message") < source.index("mark_reported")

@@ -374,11 +374,15 @@ async def _maybe_report(bot: Bot | None) -> None:
             return
         batch = list(pending[: settings.report_every])
         text = usage.batch_report(batch)
+
+        try:
+            await bot.send_message(settings.telegram_owner_id, text)
+        except Exception:
+            # Marking first would lose these ten for good. Leaving them
+            # unmarked risks sending twice, which is the better failure.
+            logger.exception("could not deliver the batch report")
+            return
         usage.mark_reported(session, batch, "in_batch_report")
-    try:
-        await bot.send_message(settings.telegram_owner_id, text)
-    except Exception:
-        logger.exception("could not deliver the batch report")
 
 
 # --------------------------------------------------------------------------
