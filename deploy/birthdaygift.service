@@ -1,35 +1,40 @@
 [Unit]
-Description=birthdaygift - birthday card bot and card pages
+Description=birthdaygift - birthday cards made in Telegram
 Documentation=https://github.com/gaspiralli97/birthdaygift
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=birthdaygift
-Group=birthdaygift
+# Runs as the login user, not a locked-down service account, because the
+# letter is written by the Claude Code CLI and that authenticates against
+# this user's own credentials in ~/.claude. A dedicated account would need
+# its own interactive login, which defeats the point of a service nobody
+# logs into. The trade is deliberate and worth stating: on this box the web
+# service shares a user with the operator's shell.
+User=ubuntu
+Group=ubuntu
 WorkingDirectory=/opt/birthdaygift
 EnvironmentFile=/etc/birthdaygift/env
-ExecStart=/usr/bin/node src/server.js
+Environment=PATH=/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+# --proxy-headers with a loopback allow-list: nginx sets X-Forwarded-For and
+# nobody else can reach the port, so request.client is the real caller.
+ExecStart=/home/ubuntu/.local/bin/uv run uvicorn birthdaygift.main:app \
+    --host 127.0.0.1 --port 8000 \
+    --proxy-headers --forwarded-allow-ips=127.0.0.1
 Restart=always
 RestartSec=3
 
-# The process only ever needs to read its code and write its data directory,
-# and it binds a high port on loopback, so it can give up everything else.
 NoNewPrivileges=true
 PrivateTmp=true
-PrivateDevices=true
-ProtectSystem=strict
-ProtectHome=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
-ReadWritePaths=/var/lib/birthdaygift
-RestrictAddressFamilies=AF_INET AF_INET6
 RestrictNamespaces=true
 LockPersonality=true
-MemoryMax=512M
-TasksMax=64
+MemoryMax=1G
+TasksMax=128
 
 [Install]
 WantedBy=multi-user.target

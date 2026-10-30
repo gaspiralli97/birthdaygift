@@ -44,7 +44,9 @@
     "failed": "Xatolik yuz berdi, karta saqlanmadi. Qaytadan: /start",
     "cancelled": "Bekor qilindi. Qaytadan boshlash: /start",
     "unknown": "Boshlash uchun /start yuboring.",
-    "again": "Yana bitta yaratish: /start"
+    "again": "Yana bitta yaratish: /start",
+    "limit_user": "Kunlik chegara tugadi — kuniga {limit} ta tabriknoma. Ertaga qayta urinib ko‘ring.",
+    "limit_global": "Bugun tizim kunlik chegarasiga yetdi. Ertaga qayta urinib ko‘ring."
   },
   "relations": {
     "friend": "Do‘stim",

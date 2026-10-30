@@ -12,7 +12,7 @@ import datetime as dt
 import logging
 from collections.abc import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .models import Card, UsageEvent
@@ -125,3 +125,21 @@ def purge_old_events(session: Session, keep_days: int = 400) -> int:
     removed = session.query(UsageEvent).filter(UsageEvent.created_at < cutoff).delete()
     session.commit()
     return int(removed)
+
+
+def counts_today(session: Session, creator_id: int) -> tuple[int, int]:
+    """How many cards this person and everyone together made in the last day.
+
+    A rolling 24 hours rather than a calendar day: a midnight boundary would
+    let someone take two allowances an hour apart.
+    """
+    since = dt.datetime.now(dt.UTC).replace(tzinfo=None) - dt.timedelta(days=1)
+    mine = session.execute(
+        select(func.count())
+        .select_from(UsageEvent)
+        .where(UsageEvent.created_at >= since, UsageEvent.creator_id == creator_id)
+    ).scalar_one()
+    everyone = session.execute(
+        select(func.count()).select_from(UsageEvent).where(UsageEvent.created_at >= since)
+    ).scalar_one()
+    return int(mine), int(everyone)

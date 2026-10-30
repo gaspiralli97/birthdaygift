@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from sqlalchemy import Boolean, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Index, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -57,21 +57,14 @@ class Card(Base):
         self.body = self.SEPARATOR.join(value)
 
 
-class RateCounter(Base):
-    """Per-day counters, one row per bucket.
+class Meta(Base):
+    """A handful of key-value rows: when the weekly report last went out, and
+    anything else the service needs to remember between restarts."""
 
-    Buckets are opaque strings such as ``ip:203.0.113.4``, ``tg:12345`` or
-    ``global``, which keeps every limit in one table and one query.
-    """
+    __tablename__ = "meta"
 
-    __tablename__ = "rate_counters"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    bucket: Mapped[str] = mapped_column(String(64))
-    day: Mapped[str] = mapped_column(String(10))  # ISO date
-    count: Mapped[int] = mapped_column(Integer, default=0)
-
-    __table_args__ = (UniqueConstraint("bucket", "day", name="uq_rate_bucket_day"),)
+    key: Mapped[str] = mapped_column(String(40), primary_key=True)
+    value: Mapped[str] = mapped_column(String(200))
 
 
 class UsageEvent(Base):

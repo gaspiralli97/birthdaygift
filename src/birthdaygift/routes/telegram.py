@@ -1,12 +1,13 @@
 """The webhook Telegram posts updates to.
 
-The path carries the shared secret and the header is checked as well: Telegram
-echoes the secret back on every call, so an update that fails either test did
-not come from Telegram and is dropped without being parsed.
+The path is static and carries no secret. Telegram echoes the shared secret
+back in a header on every call, which is enough to authenticate it, and a
+secret in the path would be written into nginx's access log on every request.
 """
 
 from __future__ import annotations
 
+import hmac
 import logging
 
 from fastapi import APIRouter, Request, Response
@@ -18,14 +19,17 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+WEBHOOK_PATH = "/telegram/webhook"
 
-@router.post("/telegram/{secret}")
-async def webhook(secret: str, request: Request) -> Response:
-    settings = get_settings()
-    expected = settings.telegram_webhook_secret
-    header = request.headers.get("x-telegram-bot-api-secret-token", "")
-    if not expected or secret != expected or header != expected:
-        logger.warning("rejected a webhook call with a bad secret")
+
+@router.post(WEBHOOK_PATH)
+async def webhook(request: Request) -> Response:
+    expected = get_settings().telegram_webhook_secret
+    offered = request.headers.get("x-telegram-bot-api-secret-token", "")
+    # compare_digest rather than == : the cost is nothing and it removes the
+    # question of whether a timing side channel is reachable here.
+    if not expected or not hmac.compare_digest(offered, expected):
+        logger.warning("rejected a webhook call without the shared secret")
         return Response(status_code=403)
 
     try:
@@ -36,7 +40,7 @@ async def webhook(secret: str, request: Request) -> Response:
     try:
         await telegram_bot.handle_update(payload)
     except Exception:
-        # Telegram retries anything that is not a 2xx, and a retry of a
-        # malformed update would simply fail again. Log and accept.
+        # Telegram retries anything that is not 2xx, and a retry of a
+        # malformed update would simply fail again. Log it and accept.
         logger.exception("update handling failed")
     return Response(status_code=200)

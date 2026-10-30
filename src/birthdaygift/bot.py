@@ -278,10 +278,37 @@ async def _write_letter(data: dict[str, object]) -> tuple[list[str], str] | None
     return (paragraphs, "ai") if paragraphs else None
 
 
+def _over_budget(creator_id: int) -> str | None:
+    """Which cap has been reached, if any.
+
+    Checked before the model is called rather than after: the letter is the
+    expensive part, and it is drawn from one shared subscription.
+    """
+    settings = get_settings()
+    with session_scope() as session:
+        mine, everyone = usage.counts_today(session, creator_id)
+    if mine >= settings.rate_per_user_per_day:
+        return "user"
+    if everyone >= settings.rate_global_per_day:
+        return "global"
+    return None
+
+
 async def _finish(message: Message, state: FSMContext) -> None:
     settings = get_settings()
     data = await state.get_data()
     copy = await _copy(state)
+
+    user = message.from_user
+    exceeded = _over_budget(user.id if user else 0)
+    if exceeded is not None:
+        await state.clear()
+        await message.answer(
+            copy.limit_user.format(limit=settings.rate_per_user_per_day)
+            if exceeded == "user"
+            else copy.limit_global
+        )
+        return
 
     if data.get("mode") == "ai":
         await message.answer(copy.working)
@@ -374,8 +401,10 @@ async def start_bot(app) -> str | None:  # type: ignore[no-untyped-def]
         default=DefaultBotProperties(parse_mode="HTML"),
     )
     me = await _bot.get_me()
+    from .routes.telegram import WEBHOOK_PATH
+
     await _bot.set_webhook(
-        f"{settings.site_url}/telegram/{settings.telegram_webhook_secret}",
+        f"{settings.site_url}{WEBHOOK_PATH}",
         secret_token=settings.telegram_webhook_secret,
         allowed_updates=["message", "callback_query"],
         drop_pending_updates=True,

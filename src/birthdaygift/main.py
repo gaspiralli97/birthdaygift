@@ -12,7 +12,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import __version__
+from . import __version__, scheduler
 from .config import get_settings
 from .db import create_all
 from .i18n import load_all
@@ -53,7 +53,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     else:
         logger.info("telegram disabled (no token or secret); card pages still served")
 
+    upkeep = scheduler.start()
+
     yield
+
+    await scheduler.stop(upkeep)
 
     if settings.bot_enabled:
         from .bot import stop_bot
@@ -62,7 +66,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-    settings = get_settings()
     app = FastAPI(
         title="birthdaygift",
         version=__version__,

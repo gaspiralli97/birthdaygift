@@ -34,9 +34,10 @@ class Settings(BaseSettings):
     #: Cards per digest. The weekly report covers whatever is left over.
     report_every: int = 10
 
-    rate_per_ip_per_day: int = Field(default=5, ge=1)
-    rate_per_telegram_user_per_day: int = Field(default=3, ge=1)
-    rate_global_per_day: int = Field(default=200, ge=1)
+    #: Every letter is a CLI session drawn from one subscription, so the bot
+    #: caps what a single person - and everyone together - can spend in a day.
+    rate_per_user_per_day: int = Field(default=5, ge=1)
+    rate_global_per_day: int = Field(default=60, ge=1)
 
     @field_validator("site_url")
     @classmethod

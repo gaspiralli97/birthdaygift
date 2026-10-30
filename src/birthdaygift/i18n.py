@@ -81,6 +81,8 @@ class BotStrings(_Section):
     cancelled: str
     unknown: str
     again: str
+    limit_user: str
+    limit_global: str
 
 
 class Strings(_Section):

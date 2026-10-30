@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from birthdaygift.routes.telegram import WEBHOOK_PATH
+
 from .conftest import SECRET
 
 UPDATE = {
@@ -13,21 +15,18 @@ UPDATE = {
 
 
 def test_a_call_without_the_header_is_refused(client: TestClient) -> None:
-    assert client.post(f"/telegram/{SECRET}", json=UPDATE).status_code == 403
+    assert client.post(WEBHOOK_PATH, json=UPDATE).status_code == 403
 
 
-def test_a_call_with_the_wrong_path_secret_is_refused(client: TestClient) -> None:
-    response = client.post(
-        "/telegram/not-the-secret",
-        json=UPDATE,
-        headers={"x-telegram-bot-api-secret-token": SECRET},
-    )
-    assert response.status_code == 403
+def test_the_secret_is_not_in_the_path(client: TestClient) -> None:
+    """A secret in the URL ends up in every access-log line."""
+    assert SECRET not in WEBHOOK_PATH
+    assert client.post(f"/telegram/{SECRET}", json=UPDATE).status_code == 404
 
 
 def test_a_call_with_the_wrong_header_is_refused(client: TestClient) -> None:
     response = client.post(
-        f"/telegram/{SECRET}",
+        WEBHOOK_PATH,
         json=UPDATE,
         headers={"x-telegram-bot-api-secret-token": "wrong"},
     )
@@ -37,7 +36,7 @@ def test_a_call_with_the_wrong_header_is_refused(client: TestClient) -> None:
 def test_a_matching_call_is_accepted(client: TestClient) -> None:
     """Both halves match, so the update is taken even with no bot running."""
     response = client.post(
-        f"/telegram/{SECRET}",
+        WEBHOOK_PATH,
         json=UPDATE,
         headers={"x-telegram-bot-api-secret-token": SECRET},
     )
@@ -46,7 +45,7 @@ def test_a_matching_call_is_accepted(client: TestClient) -> None:
 
 def test_a_malformed_body_does_not_crash_the_endpoint(client: TestClient) -> None:
     response = client.post(
-        f"/telegram/{SECRET}",
+        WEBHOOK_PATH,
         content=b"not json",
         headers={
             "x-telegram-bot-api-secret-token": SECRET,

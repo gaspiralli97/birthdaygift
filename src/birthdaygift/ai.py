@@ -11,7 +11,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import re
 import shutil
+import tempfile
 from dataclasses import dataclass
 
 from .config import get_settings
@@ -20,6 +23,33 @@ logger = logging.getLogger(__name__)
 
 #: A letter is a few hundred tokens, but the CLI starts a session each time.
 TIMEOUT_SECONDS = 180
+
+#: At most this many CLI processes at once. Each is a whole session, and they
+#: all draw on one subscription, so an unbounded fan-out would exhaust both
+#: the box and the quota.
+_CONCURRENCY = asyncio.Semaphore(2)
+
+#: Shapes that have no business in a birthday letter and would mean the model
+#: had been talked into repeating something it read. Tools are disabled, so
+#: this is a second line rather than the first.
+_SUSPICIOUS = (
+    re.compile(r"\b(?:sk|xox[baprs]|ghp|gho|github_pat)[-_][A-Za-z0-9_-]{16,}"),
+    re.compile(r"\b\d{6,}:[A-Za-z0-9_-]{30,}\b"),  # a Telegram bot token
+    re.compile(r"[A-Za-z0-9+/]{60,}={0,2}"),  # a long base64 blob
+    re.compile(r"\b[0-9a-fA-F]{48,}\b"),  # a long hex blob
+    re.compile(r"(?:^|\s)/(?:etc|var|home|root|opt)/\S+"),  # an absolute path
+    re.compile(r"^[A-Z_]{4,}=", re.MULTILINE),  # an env assignment
+)
+
+#: Not a leak, but not a letter either. When the details carry an instruction
+#: the model declines it and writes about the attempt instead, and that note
+#: would otherwise be published on a public card.
+_NOT_A_LETTER = re.compile(
+    r"prompt[- ]injection|hidden instruction|system file"
+    r"|\bas an AI\b|language model|\bI (?:can't|cannot|am not able)\b"
+    r"|anything else.{0,4} field|not a birthday detail",
+    re.IGNORECASE,
+)
 
 LANGUAGE_NAMES = {
     "uz": "Uzbek, Latin script",
@@ -185,37 +215,94 @@ async def write_letter(brief: Brief) -> list[str] | None:
         return None
 
     prompt = build_prompt(brief)
-    try:
-        process = await asyncio.create_subprocess_exec(
-            binary,
-            "-p",
-            "--model",
-            get_settings().claude_model,
-            # The prompt goes in on stdin, not argv: it carries a third party's
-            # name, age and private memories, and argv is readable by anyone
-            # who can run `ps` on the box.
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(prompt.encode("utf-8")), timeout=TIMEOUT_SECONDS
-        )
-    except TimeoutError:
-        logger.error("claude timed out after %ss", TIMEOUT_SECONDS)
+    async with _CONCURRENCY:
+        raw = await _run(binary, prompt)
+    if raw is None:
         return None
-    except Exception:
-        logger.exception("claude could not be started")
+
+    paragraphs = _clean(raw)
+    if not paragraphs:
+        logger.error("claude returned nothing usable")
         return None
+
+    letter = "\n".join(paragraphs)
+    if any(pattern.search(letter) for pattern in _SUSPICIOUS):
+        # Something that is not prose came back. Publishing it would put it on
+        # a public URL, so throw it away and let the sender write their own.
+        logger.error("discarded a letter containing something that is not prose")
+        return None
+    if _NOT_A_LETTER.search(letter):
+        logger.error("discarded a reply that discussed the request instead of answering it")
+        return None
+    return paragraphs
+
+
+def _child_environment() -> dict[str, str]:
+    """The smallest environment the CLI can still authenticate in.
+
+    The service is started with an EnvironmentFile that holds the bot token,
+    and a child inherits all of it by default. The CLI needs HOME to find the
+    credentials it logged in with, and PATH to find its own runtime; it has no
+    business seeing anything else.
+    """
+    parent = os.environ
+    # USER is not optional: without it the CLI cannot locate the credentials
+    # it logged in with and reports itself as signed out.
+    keep = (
+        "HOME",
+        "PATH",
+        "USER",
+        "LOGNAME",
+        "LANG",
+        "LC_ALL",
+        "TERM",
+        "TZ",
+        "XDG_CONFIG_HOME",
+        "XDG_CACHE_HOME",
+    )
+    return {name: parent[name] for name in keep if name in parent}
+
+
+async def _run(binary: str, prompt: str) -> str | None:
+    """One CLI invocation, with as little reachable from inside it as possible."""
+    with tempfile.TemporaryDirectory(prefix="birthdaygift-") as scratch:
+        try:
+            process = await asyncio.create_subprocess_exec(
+                binary,
+                "-p",
+                "--model",
+                get_settings().claude_model,
+                # The letter is written from text a stranger typed, so the
+                # session gets no tools at all: without them an injected
+                # instruction has nothing to reach for. The other two flags
+                # stop a settings file or an MCP server handing any back.
+                "--tools",
+                "",
+                "--strict-mcp-config",
+                "--setting-sources",
+                "",
+                # The prompt goes in on stdin, not argv: it carries a third
+                # party's name, age and private memories, and argv is readable
+                # by anyone who can run `ps` on the box.
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=scratch,
+                env=_child_environment(),
+            )
+            stdout, stderr = await asyncio.wait_for(
+                process.communicate(prompt.encode("utf-8")), timeout=TIMEOUT_SECONDS
+            )
+        except TimeoutError:
+            logger.error("claude timed out after %ss", TIMEOUT_SECONDS)
+            return None
+        except Exception:
+            logger.exception("claude could not be started")
+            return None
 
     if process.returncode != 0:
         logger.error(
             "claude exited %s: %s", process.returncode, stderr.decode("utf-8", "replace")[:300]
         )
         return None
-
-    paragraphs = _clean(stdout.decode("utf-8", "replace"))
-    if not paragraphs:
-        logger.error("claude returned nothing usable")
-        return None
-    return paragraphs
+    return stdout.decode("utf-8", "replace")

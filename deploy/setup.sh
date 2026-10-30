@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Provisions birthdaygift on a fresh Ubuntu 24.04 host (tested on OCI arm64).
-# Idempotent: safe to re-run after a code change.
+# Provisions birthdaygift on Ubuntu 24.04 (tested on an Oracle Cloud arm64 box).
+# Idempotent: re-run it after a code change to deploy the new revision.
 #
 #   sudo bash deploy/setup.sh
 #
-# Afterwards, put the secrets in /etc/birthdaygift/env and restart the service.
+# Afterwards, fill in the three secrets in /etc/birthdaygift/env and restart.
 
 set -euo pipefail
 
@@ -12,61 +12,77 @@ DOMAIN="${DOMAIN:-151-145-79-228.sslip.io}"
 APP_DIR=/opt/birthdaygift
 DATA_DIR=/var/lib/birthdaygift
 ENV_DIR=/etc/birthdaygift
+RUN_USER="${RUN_USER:-ubuntu}"
 REPO="${REPO:-https://github.com/gaspiralli97/birthdaygift.git}"
 
 say() { printf '\n\033[1;33m==> %s\033[0m\n' "$*"; }
 
 [[ $EUID -eq 0 ]] || { echo "run with sudo" >&2; exit 1; }
+id -u "$RUN_USER" >/dev/null 2>&1 || { echo "no such user: $RUN_USER" >&2; exit 1; }
 
 say "Packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq curl git ca-certificates nginx certbot python3-certbot-nginx iptables-persistent
+apt-get install -y -qq curl git ca-certificates nginx certbot python3-certbot-nginx \
+    iptables-persistent python3-venv \
+    fonts-noto-cjk   # preview images draw Korean names; without this they are boxes
 
-if ! command -v node >/dev/null || [[ "$(node -v | cut -c2- | cut -d. -f1)" -lt 20 ]]; then
-  say "Node.js 22 (arm64)"
-  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-  apt-get install -y -qq nodejs
+say "uv"
+if ! sudo -u "$RUN_USER" test -x "/home/$RUN_USER/.local/bin/uv"; then
+  sudo -u "$RUN_USER" bash -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
 fi
-node -v
+sudo -u "$RUN_USER" /home/"$RUN_USER"/.local/bin/uv --version
 
-say "Service user and directories"
-id -u birthdaygift >/dev/null 2>&1 || useradd --system --home "$DATA_DIR" --shell /usr/sbin/nologin birthdaygift
+say "Directories"
 mkdir -p "$APP_DIR" "$DATA_DIR" "$ENV_DIR"
-chown -R birthdaygift:birthdaygift "$DATA_DIR"
+chown -R "$RUN_USER:$RUN_USER" "$APP_DIR" "$DATA_DIR"
 chmod 750 "$ENV_DIR"
 
 say "Code"
 if [[ -d $APP_DIR/.git ]]; then
-  git -C "$APP_DIR" fetch --quiet origin
-  git -C "$APP_DIR" reset --hard --quiet origin/HEAD
+  sudo -u "$RUN_USER" git -C "$APP_DIR" fetch --quiet origin
+  sudo -u "$RUN_USER" git -C "$APP_DIR" reset --hard --quiet origin/main
 else
-  git clone --quiet "$REPO" "$APP_DIR"
+  sudo -u "$RUN_USER" git clone --quiet "$REPO" "$APP_DIR"
 fi
-chown -R root:root "$APP_DIR"
+
+say "Dependencies"
+sudo -u "$RUN_USER" bash -lc "cd $APP_DIR && /home/$RUN_USER/.local/bin/uv sync --no-dev"
 
 if [[ ! -f $ENV_DIR/env ]]; then
-  say "Writing $ENV_DIR/env with placeholders - fill in the secrets yourself"
+  say "Writing $ENV_DIR/env — fill in the three secrets yourself"
   cat > "$ENV_DIR/env" <<ENVEOF
-PORT=3000
-PUBLIC_URL=https://$DOMAIN
-DATA_DIR=$DATA_DIR
+SITE_URL=https://$DOMAIN
+DATABASE_PATH=$DATA_DIR/birthdaygift.db
 CARD_TTL_DAYS=5
-AI_PROVIDER=none
-ANTHROPIC_API_KEY=
-ANTHROPIC_MODEL=claude-opus-5
+
+# The Claude Code CLI writes the letters. It authenticates with the
+# subscription this user logged in with: run \`claude setup-token\` once.
+CLAUDE_BIN=/home/$RUN_USER/.local/bin/claude
+CLAUDE_MODEL=sonnet
+
+# From @BotFather.
 TELEGRAM_BOT_TOKEN=
-RATE_PER_USER_PER_DAY=3
-RATE_GLOBAL_PER_DAY=100
+# Any random string. Telegram echoes it back on every webhook call.
+TELEGRAM_WEBHOOK_SECRET=
+# Your own Telegram id, where both usage reports are delivered.
+TELEGRAM_OWNER_ID=
+
+REPORT_EVERY=10
+RATE_PER_USER_PER_DAY=5
+RATE_GLOBAL_PER_DAY=60
 ENVEOF
   chmod 640 "$ENV_DIR/env"
-  chown root:birthdaygift "$ENV_DIR/env"
+  chown root:"$RUN_USER" "$ENV_DIR/env"
 fi
 
-say "Firewall (local iptables; the OCI security list must allow 80/443 too)"
-# The chain ends in a catch-all REJECT, so the ACCEPTs have to go *before* it.
-# Appending, or inserting at a fixed index, silently puts them after the REJECT
-# where they never match.
+say "Database"
+sudo -u "$RUN_USER" bash -lc \
+  "cd $APP_DIR && set -a && . $ENV_DIR/env && set +a && /home/$RUN_USER/.local/bin/uv run alembic upgrade head"
+
+say "Firewall (local iptables; the cloud security list must allow 80/443 too)"
+# The chain ends in a catch-all REJECT, so the ACCEPTs have to go before it.
+# Appending, or inserting at a fixed index, silently puts them after it.
 reject_pos() {
   iptables -L INPUT --line-numbers -n |
     awk '$2 == "REJECT" || $2 == "DROP" { print $1; exit }'
@@ -84,6 +100,8 @@ done
 netfilter-persistent save >/dev/null
 
 say "nginx"
+grep -q 'zone=cards' /etc/nginx/nginx.conf || \
+  sed -i '/http {/a \    limit_req_zone $binary_remote_addr zone=cards:10m rate=10r/s;' /etc/nginx/nginx.conf
 install -m 644 "$APP_DIR/deploy/nginx.conf" /etc/nginx/sites-available/birthdaygift
 sed -i "s/151-145-79-228\.sslip\.io/$DOMAIN/g" /etc/nginx/sites-available/birthdaygift
 ln -sf /etc/nginx/sites-available/birthdaygift /etc/nginx/sites-enabled/birthdaygift
@@ -93,14 +111,17 @@ systemctl reload nginx
 
 say "systemd"
 install -m 644 "$APP_DIR/deploy/birthdaygift.service" /etc/systemd/system/birthdaygift.service
+sed -i "s/^User=ubuntu$/User=$RUN_USER/; s/^Group=ubuntu$/Group=$RUN_USER/" \
+  /etc/systemd/system/birthdaygift.service
 systemctl daemon-reload
 systemctl enable --now birthdaygift
-sleep 2
+sleep 3
 systemctl is-active birthdaygift
 
 say "TLS certificate"
 if [[ ! -d /etc/letsencrypt/live/$DOMAIN ]]; then
-  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --register-unsafely-without-email --redirect
+  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
+    --register-unsafely-without-email --redirect
 else
   echo "certificate already present"
 fi
@@ -108,5 +129,8 @@ fi
 say "Done"
 echo "  https://$DOMAIN"
 echo
-echo "Next: put TELEGRAM_BOT_TOKEN in $ENV_DIR/env, then:"
-echo "  sudo systemctl restart birthdaygift"
+echo "Still to do, by hand:"
+echo "  1. sudo -u $RUN_USER /home/$RUN_USER/.local/bin/claude setup-token"
+echo "  2. put TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET and"
+echo "     TELEGRAM_OWNER_ID into $ENV_DIR/env"
+echo "  3. sudo systemctl restart birthdaygift"

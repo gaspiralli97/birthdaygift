@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # The server runs 3.12; .python-version pins the same here so a
+      # version-dependent failure shows up in CI rather than on the box.
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Types
+        run: uv run mypy
+
+      - name: Tests
+        run: uv run pytest -q
+
+      # The card page draws names in four scripts; a missing CJK face would
+      # turn Korean into boxes in every preview image.
+      - name: Fonts for preview images
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: Preview images render in every script
+        run: |
+          uv run python - <<'PY'
+          from birthdaygift.models import Card
+          from birthdaygift.og import render_card_image
+          for name, theme in (("Sahobiddin", "qora"), ("민지", "vino"), ("Анна", "qaymoq")):
+              card = Card(id="b" * 27, lang="uz", relation="friend", field="math",
+                          body="x", source="ai", name=name, age=30, theme=theme)
+              data = render_card_image(card)
+              assert data[:8] == b"\x89PNG\r\n\x1a\n", name
+              print(f"{name:12} {theme:8} {len(data) // 1024:3} KB")
+          PY

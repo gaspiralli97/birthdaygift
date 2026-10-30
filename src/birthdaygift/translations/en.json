@@ -44,7 +44,9 @@
     "failed": "Something went wrong and the card was not saved. Start again: /start",
     "cancelled": "Cancelled. Start again with /start",
     "unknown": "Send /start to begin.",
-    "again": "Make another: /start"
+    "again": "Make another: /start",
+    "limit_user": "Daily limit reached — {limit} cards a day. Try again tomorrow.",
+    "limit_global": "The service hit its daily cap. Try again tomorrow."
   },
   "relations": {
     "friend": "Friend",
