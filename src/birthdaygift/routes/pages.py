@@ -1,8 +1,13 @@
-"""HTML pages and the preview image."""
+"""The public side: a card, its preview image, and a page explaining the bot.
+
+Cards are made in Telegram, so nothing here creates one. Everything this
+router serves is read-only, which is what keeps the only internet-facing
+surface this small.
+"""
 
 from __future__ import annotations
 
-import json
+from dataclasses import dataclass
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import HTMLResponse
@@ -10,29 +15,29 @@ from fastapi.responses import HTMLResponse
 from .. import cards, view
 from ..config import get_settings
 from ..deps import DbSession
-from ..i18n import LANGUAGES, normalize_lang, strings
+from ..facts import age_fact
+from ..i18n import LANGUAGES, fact_note, fact_title, normalize_lang, strings
 from ..ids import is_card_id
 from ..og import render_card_image
 from ..templating import templates
-from ..themes import THEMES, get_theme
+from ..themes import get_theme
 
 router = APIRouter()
 
-LANGUAGE_NAMES = {
-    "uz": "O‘zbekcha",
-    "en": "English",
-    "ko": "한국어",
-    "ru": "Русский",
-}
+
+@dataclass(frozen=True, slots=True)
+class RenderedFact:
+    title: str
+    headline: str
+    note: str
 
 
 def _negotiate(request: Request) -> str:
-    """Pick a UI language from ?lang= or the browser's Accept-Language."""
+    """Pick a language from ?lang= or the browser's Accept-Language."""
     requested = request.query_params.get("lang")
     if requested in LANGUAGES:
         return requested
-    header = request.headers.get("accept-language", "")
-    for part in header.split(","):
+    for part in request.headers.get("accept-language", "").split(","):
         code = part.split(";")[0].strip().lower()[:2]
         if code in LANGUAGES:
             return code
@@ -40,36 +45,24 @@ def _negotiate(request: Request) -> str:
 
 
 @router.get("/", response_class=HTMLResponse)
-def index(request: Request) -> Response:
+def landing(request: Request) -> Response:
     settings = get_settings()
     lang = _negotiate(request)
-    theme = get_theme("midnight")
+    copy = strings(lang)
 
-    # The form restyles itself as the theme radio changes, so the palettes have
-    # to reach the client as data rather than as pre-rendered CSS.
-    theme_json = {
-        key: {
-            "variables": dict(pair.split(":", 1) for pair in value.css_variables.split(";")),
-            "color_scheme": value.color_scheme,
-        }
-        for key, value in THEMES.items()
-    }
-
-    bot_url = None
-    if settings.bot_enabled and request.app.state.bot_username:
-        bot_url = f"https://t.me/{request.app.state.bot_username}"
-
+    bot_username = getattr(request.app.state, "bot_username", None)
     return templates.TemplateResponse(
         request,
-        "index.html",
+        "landing.html",
         {
             "lang": lang,
-            "strings": strings(lang),
-            "theme": theme,
-            "themes": THEMES,
-            "theme_json": json.dumps(theme_json),
-            "language_names": LANGUAGE_NAMES,
-            "bot_url": bot_url,
+            "strings": copy,
+            "theme": get_theme("qora"),
+            "title": copy.form.title,
+            "lede": copy.form.subtitle,
+            "how": copy.form.how_it_works,
+            "bot_url": f"https://t.me/{bot_username}" if bot_username else None,
+            "site_url": settings.site_url,
         },
     )
 
@@ -82,12 +75,12 @@ def show_card(card_id: str, request: Request, session: DbSession) -> Response:
         return templates.TemplateResponse(
             request,
             "expired.html",
-            {"lang": lang, "strings": strings(lang), "theme": get_theme("midnight")},
+            {"lang": lang, "strings": strings(lang), "theme": get_theme("qora")},
             status_code=404,
         )
 
     lang = normalize_lang(card.lang)
-    settings = get_settings()
+    fact = age_fact(card.age, lang, card.field)
     return templates.TemplateResponse(
         request,
         "card.html",
@@ -98,7 +91,16 @@ def show_card(card_id: str, request: Request, session: DbSession) -> Response:
             "theme": get_theme(card.theme),
             "candles": view.candle_count(card.age),
             "days_left": view.days_left(card),
-            "card_url": settings.card_url(card.id),
+            "card_url": get_settings().card_url(card.id),
+            "fact": (
+                RenderedFact(
+                    title=fact_title(lang, fact.kind),
+                    headline=fact.headline,
+                    note=fact_note(lang, fact.kind, fact.values),
+                )
+                if fact
+                else None
+            ),
         },
         headers={"cache-control": "no-store"},
     )
@@ -110,7 +112,7 @@ def card_image(card_id: str, session: DbSession) -> Response:
         return Response(status_code=404)
 
     # Link unfurlers fetch this; counting each as a view would inflate the
-    # number the recipient sees on the page.
+    # number the recipient is shown on the page.
     card = cards.fetch(session, card_id, count_view=False)
     if card is None:
         return Response(status_code=404)

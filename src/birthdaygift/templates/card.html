@@ -20,8 +20,8 @@
 
 <main
   data-candles="{{ candles }}"
-  data-stars="{{ '1' if theme.stars else '0' }}"
-  data-confetti="{{ theme.confetti | join(',') }}"
+  data-light="{{ '1' if theme.light else '0' }}"
+  data-confetti="{{ theme.confetti_css }}"
   data-lit-label="{{ candles }} {{ s.lit_label }}"
   data-out-label="{{ candles }} {{ s.out_label }}"
   data-blow-label="{{ s.blow }}"
@@ -56,21 +56,19 @@
       <div><b>{{ (card.age * 12) | thousands }}</b><span>{{ s.months }}</span></div>
       <div><b>{{ card.age | lived_days | thousands }}</b><span>{{ s.days }}</span></div>
     </section>
+  {% endif %}
 
-    {% set factors = card.age | prime_factors %}
-    {% if factors %}
-      <div class="math">
-        <div class="eyebrow">{{ s.math_title }}</div>
-        <p class="eq">{{ card.age }} = {{ factors | join(' × ') }}</p>
-        <p>{{ s.prime_one if factors | length == 1 else s.prime_many }}</p>
-      </div>
-    {% endif %}
+  {% if fact %}
+    <div class="fact">
+      <div class="eyebrow">{{ fact.title }}</div>
+      <p class="headline">{{ fact.headline }}</p>
+      <p>{{ fact.note }}</p>
+    </div>
   {% endif %}
 
   <p class="note">
-    {{ s.expires_in.format(days=days_left) }}<br>
-    {% if card.views > 1 %}{{ s.views.format(count=card.views) }}<br>{% endif %}
-    <a href="/">{{ strings.expired.make_one }}</a>
+    {{ s.expires_in.format(days=days_left) }}
+    {%- if card.views > 1 %}<br>{{ s.views.format(count=card.views) }}{% endif %}
   </p>
 </main>
 {% endblock %}

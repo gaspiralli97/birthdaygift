@@ -112,6 +112,9 @@ class Strings(_Section):
     bot: BotStrings
     relations: dict[str, str]
     themes: dict[str, str]
+    #: One title per lens (number, code, heart, …) and one note per fact kind.
+    fact_titles: dict[str, str]
+    fact_notes: dict[str, str]
 
 
 @lru_cache
@@ -129,3 +132,29 @@ def load_all() -> dict[str, Strings]:
 
 def normalize_lang(value: str | None) -> Lang:
     return value if value in LANGUAGES else DEFAULT_LANG  # type: ignore[return-value]
+
+
+#: Every arithmetic fact shares one title; the other lenses have their own.
+_TITLE_GROUP = {
+    "perfect": "number",
+    "factorial": "number",
+    "primorial": "number",
+    "square_triangular": "number",
+    "power2": "number",
+    "cube": "number",
+    "square": "number",
+    "fibonacci": "number",
+    "triangular": "number",
+    "repdigit": "number",
+    "prime": "number",
+    "round": "number",
+    "factors": "number",
+}
+
+
+def fact_title(lang: str, kind: str) -> str:
+    return strings(lang).fact_titles[_TITLE_GROUP.get(kind, kind)]
+
+
+def fact_note(lang: str, kind: str, values: dict[str, object]) -> str:
+    return strings(lang).fact_notes[kind].format(**values)

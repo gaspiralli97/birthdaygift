@@ -84,5 +84,35 @@
     "midnight": "Tungi osmon",
     "paper": "Qog‘oz",
     "neon": "Neon"
+  },
+  "fact_titles": {
+    "number": "Bir kichik matematika",
+    "code": "Ikkilik sanoqda",
+    "heart": "Yurak hisobi",
+    "words": "Aytilgan so‘zlar",
+    "seasons": "Ko‘rilgan bahorlar",
+    "orbit": "Quyosh atrofida",
+    "sleep": "Uyquda o‘tgan yillar"
+  },
+  "fact_notes": {
+    "perfect": "Mukammal son — o‘z bo‘luvchilarining yig‘indisiga teng. Yuzgacha bor-yo‘g‘i ikkitasi bor.",
+    "factorial": "Birdan {k} gacha hamma sonning ko‘paytmasi. Toza raqam.",
+    "primorial": "Dastlabki {k} ta tub sonning ko‘paytmasi. Har yoshga nasib qilmaydi.",
+    "square_triangular": "Ham kvadrat, ham uchburchak son. Bunaqasi juda kam — keyingisi 1225.",
+    "power2": "Ikkining darajasi. Kompyuterlar shu sonlarni yaxshi ko‘radi.",
+    "cube": "To‘liq kub. Yuzgacha faqat to‘rttasi bor.",
+    "square": "To‘liq kvadrat — qiyshiq joyi yo‘q yosh.",
+    "fibonacci": "Fibonachchi soni: oldingi ikkitasining yig‘indisi. Tabiat shu ketma-ketlikda o‘sadi.",
+    "triangular": "Uchburchak son. {k} qatorli piramida aynan shuncha bo‘ladi.",
+    "repdigit": "Ikki bir xil raqam. Yiliga bir marta ham emas — umrda bir marta.",
+    "prime": "Tub son. Faqat o‘ziga va birga bo‘linadi, boshqa hech kimga.",
+    "round": "Yumaloq son. Bunaqa yillar esda qoladi.",
+    "factors": "Tub ko‘paytuvchilarga ajratilgani.",
+    "code": "Ikkilik va o‘n oltilik sanoqda. Kasbingiz shu ikkisida gapiradi.",
+    "heart": "Yuragingiz taxminan shuncha marta urdi. Bir marta ham so‘ramay.",
+    "words": "Taxminan shuncha so‘z aytgansiz. Ba’zilari esda qolgan.",
+    "orbit": "Quyosh atrofida {n} marta aylandingiz. Bir joydan jilmay turib.",
+    "seasons": "Shuncha bahor ko‘rdingiz. Har biri boshqacha edi.",
+    "sleep": "Taxminan shuncha yilni uyquda o‘tkazdingiz. Afsuslanadigan joyi yo‘q."
   }
 }

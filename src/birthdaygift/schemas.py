@@ -11,6 +11,7 @@ from typing import Annotated, Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .facts import WorkField
 from .i18n import Lang
 from .themes import ThemeKey
 
@@ -36,6 +37,7 @@ class CardCreate(BaseModel):
     name: Annotated[str, Field(min_length=1, max_length=40)]
     age: Annotated[int, Field(ge=1, le=129)] | None = None
     relation: Relation = "friend"
+    field: WorkField = "other"
     lang: Lang = "uz"
     theme: ThemeKey = "midnight"
     details: Annotated[str, Field(max_length=600)] = ""

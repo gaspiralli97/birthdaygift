@@ -1,7 +1,9 @@
-"""Card looks.
+"""Card colourways.
 
-A theme is only a palette plus two switches, so adding one means adding an
-entry here and a name in each translation file - no template changes.
+Sampled from the Baginy storefront rather than invented: near-black, burgundy
+and champagne are that project's own three colours, already proven to sit
+together. A colourway is only a palette plus one switch, so adding one means
+an entry here and a name in each translation file.
 """
 
 from __future__ import annotations
@@ -9,90 +11,85 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, get_args
 
-ThemeKey = Literal["midnight", "paper", "neon"]
+ThemeKey = Literal["qora", "vino", "qaymoq"]
 THEME_KEYS: tuple[ThemeKey, ...] = get_args(ThemeKey)
-DEFAULT_THEME: ThemeKey = "midnight"
+DEFAULT_THEME: ThemeKey = "qora"
 
 
 @dataclass(frozen=True, slots=True)
 class Theme:
     key: ThemeKey
-    bg: str
-    bg_glow: str
-    ink: str
-    muted: str
+    night: str
+    night_2: str
     accent: str
     accent_soft: str
+    accent_lift: str
+    paper: str
+    muted: str
     flame: str
-    panel: str
-    border: str
-    #: Whether the animated starfield is drawn behind the card.
-    stars: bool
     confetti: tuple[str, ...]
-    color_scheme: Literal["dark", "light"]
+    #: Dark specks on a light sheet read as dirt at full strength.
+    light: bool
 
     @property
     def css_variables(self) -> str:
-        """The palette as a CSS custom-property block."""
         pairs = {
-            "--bg": self.bg,
-            "--bg-glow": self.bg_glow,
-            "--ink": self.ink,
-            "--muted": self.muted,
+            "--night": self.night,
+            "--night-2": self.night_2,
             "--accent": self.accent,
             "--accent-soft": self.accent_soft,
+            "--accent-lift": self.accent_lift,
+            "--paper": self.paper,
+            "--muted": self.muted,
             "--flame": self.flame,
-            "--panel": self.panel,
-            "--border": self.border,
         }
         return ";".join(f"{name}:{value}" for name, value in pairs.items())
 
+    @property
+    def confetti_css(self) -> str:
+        return ",".join(self.confetti)
+
 
 THEMES: dict[ThemeKey, Theme] = {
-    "midnight": Theme(
-        key="midnight",
-        bg="#0d1526",
-        bg_glow="#16223a",
-        ink="#f2ede3",
-        muted="#9aa6bd",
-        accent="#e9c47c",
-        accent_soft="#b8975a",
-        flame="#ffb347",
-        panel="rgba(242,237,227,0.04)",
-        border="rgba(233,196,124,0.22)",
-        stars=True,
-        confetti=("#e9c47c", "#f2ede3", "#ffb347", "#8fb3ff", "#f28b82"),
-        color_scheme="dark",
+    "qora": Theme(
+        key="qora",
+        night="#0c0c0c",
+        night_2="#1b1b1b",
+        accent="#f2d9a0",
+        accent_soft="#e3c08d",
+        accent_lift="#fdf6e6",
+        paper="#f2e5c6",
+        muted="#8a8276",
+        flame="#f2d9a0",
+        confetti=("#f2d9a0", "#f2e5c6", "#e3c08d", "#75162d", "#ffffff"),
+        light=False,
     ),
-    "paper": Theme(
-        key="paper",
-        bg="#f6f3ec",
-        bg_glow="#fffdf8",
-        ink="#1d1a16",
-        muted="#6f6861",
-        accent="#9a5b3d",
-        accent_soft="#c08a6b",
-        flame="#e08a2e",
-        panel="rgba(29,26,22,0.03)",
-        border="rgba(29,26,22,0.14)",
-        stars=False,
-        confetti=("#9a5b3d", "#1d1a16", "#e08a2e", "#6f8f6a", "#b5544f"),
-        color_scheme="light",
+    "vino": Theme(
+        key="vino",
+        night="#3a0a16",
+        night_2="#75162d",
+        accent="#f2d9a0",
+        accent_soft="#e3c08d",
+        accent_lift="#fdf6e6",
+        paper="#f7ece0",
+        muted="#c0a2a8",
+        flame="#f2d9a0",
+        confetti=("#f2d9a0", "#f7ece0", "#e3c08d", "#5c1024", "#ffffff"),
+        light=False,
     ),
-    "neon": Theme(
-        key="neon",
-        bg="#0a0613",
-        bg_glow="#1b0f33",
-        ink="#f3ecff",
-        muted="#9d8fc4",
-        accent="#ff4ecd",
-        accent_soft="#9b5cff",
-        flame="#4ee6ff",
-        panel="rgba(243,236,255,0.05)",
-        border="rgba(255,78,205,0.28)",
-        stars=True,
-        confetti=("#ff4ecd", "#4ee6ff", "#9b5cff", "#f3ecff", "#ffe14e"),
-        color_scheme="dark",
+    "qaymoq": Theme(
+        key="qaymoq",
+        night="#f2e5c6",
+        night_2="#faf3e4",
+        accent="#75162d",
+        accent_soft="#5c1024",
+        accent_lift="#a8384f",
+        paper="#0c0c0c",
+        muted="#6b5d47",
+        # A pale flame vanishes on a pale sheet; two stops down the same ramp.
+        flame="#c07d1e",
+        confetti=("#75162d", "#0c0c0c", "#e3c08d", "#f2d9a0", "#8a8276"),
+        light=True,
     ),
 }
 

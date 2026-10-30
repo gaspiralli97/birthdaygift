@@ -105,8 +105,8 @@ def _background(theme: Theme) -> Image.Image:
     Pillow has no gradient primitive, and pulling in numpy for one image would
     be a poor trade; 160 ellipses are visually indistinguishable here.
     """
-    base = _rgb(theme.bg)
-    glow = _rgb(theme.bg_glow)
+    base = _rgb(theme.night)
+    glow = _rgb(theme.night_2)
     image = Image.new("RGB", (WIDTH, HEIGHT), base)
     draw = ImageDraw.Draw(image)
 
@@ -132,7 +132,7 @@ def _draw_candles(draw: ImageDraw.ImageDraw, theme: Theme, count: int, base_y: i
     shown = max(1, min(count, 22))
     accent = _rgb(theme.accent)
     flame = _rgb(theme.flame)
-    ink = _rgb(theme.ink)
+    ink = _rgb(theme.paper)
 
     pitch = min(34, (WIDTH - 2 * PAD) / shown)
     start = PAD + pitch / 2
@@ -170,7 +170,7 @@ def render_card_image(card: Card) -> bytes:
     draw = ImageDraw.Draw(image)
 
     accent = _rgb(theme.accent)
-    ink = _rgb(theme.ink)
+    ink = _rgb(theme.paper)
     muted = _rgb(theme.muted)
 
     draw.text((PAD, PAD - 10), "birthdaygift", font=_font(_SANS, 26, 500), fill=muted)

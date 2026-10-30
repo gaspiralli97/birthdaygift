@@ -12,7 +12,6 @@ from .config import get_settings
 from .ids import is_card_id, new_card_id
 from .models import Card
 from .schemas import CardCreate
-from .text import write_letter
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +21,19 @@ logger = logging.getLogger(__name__)
 _ID_ATTEMPTS = 5
 
 
-def create(session: Session, payload: CardCreate) -> Card:
-    """Write a new card and return it.
+def create(
+    session: Session,
+    payload: CardCreate,
+    paragraphs: list[str],
+    source: str,
+) -> Card:
+    """Store a card and return it.
 
-    The letter is generated once, here, and stored - so the card reads the same
-    on every visit and reopening it costs nothing.
+    The letter comes in already written - by the sender or by a model - and is
+    stored rather than regenerated, so the card reads the same on every visit
+    and reopening it costs nothing.
     """
     settings = get_settings()
-    paragraphs, source = write_letter(payload)
     now = dt.datetime.now(dt.UTC)
 
     for _ in range(_ID_ATTEMPTS):
@@ -46,6 +50,7 @@ def create(session: Session, payload: CardCreate) -> Card:
         name=payload.name,
         age=payload.age,
         relation=payload.relation,
+        field=payload.field,
         from_name=payload.from_name,
         details=payload.details,
         source=source,

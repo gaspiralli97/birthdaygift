@@ -4,10 +4,14 @@
 {% block title %}{{ s.title }}{% endblock %}
 
 {% block body %}
-<main>
+<canvas id="sky" aria-hidden="true"></canvas>
+<main data-candles="0" data-light="{{ '1' if theme.light else '0' }}">
   <div class="eyebrow">{{ strings.card.eyebrow }}</div>
   <h1>{{ s.title }}</h1>
   <article class="letter"><p>{{ s.body }}</p></article>
-  <p class="note"><a href="/">{{ s.make_one }}</a></p>
 </main>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', path='/js/card.js') }}" defer></script>
 {% endblock %}

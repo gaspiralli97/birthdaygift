@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from sqlalchemy import Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -30,6 +30,8 @@ class Card(Base):
     name: Mapped[str] = mapped_column(String(40))
     age: Mapped[int | None] = mapped_column(Integer, nullable=True)
     relation: Mapped[str] = mapped_column(String(16))
+    #: Drives which observation the card makes about the age.
+    field: Mapped[str] = mapped_column(String(16), default="other")
     from_name: Mapped[str] = mapped_column(String(40), default="")
     details: Mapped[str] = mapped_column(String(600), default="")
 
@@ -70,3 +72,38 @@ class RateCounter(Base):
     count: Mapped[int] = mapped_column(Integer, default=0)
 
     __table_args__ = (UniqueConstraint("bucket", "day", name="uq_rate_bucket_day"),)
+
+
+class UsageEvent(Base):
+    """One row per card made, kept after the card itself is gone.
+
+    Cards delete themselves on the fifth day, so they cannot carry the record
+    of who used the service. This table is append-only and never purged with
+    them, which is what lets the weekly report look further back than the
+    cards still alive.
+    """
+
+    __tablename__ = "usage_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    card_id: Mapped[str] = mapped_column(String(32))
+
+    creator_id: Mapped[int] = mapped_column(Integer)
+    creator_name: Mapped[str] = mapped_column(String(80), default="")
+
+    recipient: Mapped[str] = mapped_column(String(40))
+    age: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    lang: Mapped[str] = mapped_column(String(2))
+    theme: Mapped[str] = mapped_column(String(16))
+    #: "self" when the sender wrote the letter, "ai" when a model did.
+    source: Mapped[str] = mapped_column(String(16))
+
+    created_at: Mapped[dt.datetime] = mapped_column()
+    #: Cleared once the event has gone out in each kind of report.
+    in_batch_report: Mapped[bool] = mapped_column(Boolean, default=False)
+    in_weekly_report: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    __table_args__ = (
+        Index("ix_usage_created_at", "created_at"),
+        Index("ix_usage_pending", "in_batch_report", "in_weekly_report"),
+    )

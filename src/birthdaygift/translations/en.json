@@ -84,5 +84,35 @@
     "midnight": "Midnight",
     "paper": "Paper",
     "neon": "Neon"
+  },
+  "fact_titles": {
+    "number": "A little arithmetic",
+    "code": "In binary",
+    "heart": "By the heartbeat",
+    "words": "Words spoken",
+    "seasons": "Springs seen",
+    "orbit": "Around the sun",
+    "sleep": "Years asleep"
+  },
+  "fact_notes": {
+    "perfect": "A perfect number — equal to the sum of its own divisors. There are only two below a hundred.",
+    "factorial": "Every number from one to {k}, multiplied. A tidy figure.",
+    "primorial": "The product of the first {k} primes. Not every age can say that.",
+    "square_triangular": "Square and triangular at once. The next one is 1225.",
+    "power2": "A power of two. Computers are fond of these.",
+    "cube": "A perfect cube. There are only four below a hundred.",
+    "square": "A perfect square — an age with no rough edges.",
+    "fibonacci": "A Fibonacci number: the sum of the two before it. This is the sequence things grow along.",
+    "triangular": "A triangular number — a pyramid {k} rows deep comes to exactly this.",
+    "repdigit": "Twice the same digit. That happens once in a life, not once a year.",
+    "prime": "A prime number. It divides by itself and one, and by nothing else.",
+    "round": "A round number. These are the years people remember.",
+    "factors": "Broken into its prime factors.",
+    "code": "Binary and hexadecimal. Your trade speaks in both.",
+    "heart": "That is roughly how many times your heart has beaten. Without being asked once.",
+    "words": "About that many words spoken. A few of them stuck.",
+    "orbit": "{n} laps around the sun. Without leaving the room.",
+    "seasons": "That many springs. No two of them alike.",
+    "sleep": "Roughly that many years asleep. No regrets there."
   }
 }

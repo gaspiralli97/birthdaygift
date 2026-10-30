@@ -16,7 +16,7 @@ from . import __version__
 from .config import get_settings
 from .db import create_all
 from .i18n import load_all, strings
-from .routes import api, pages
+from .routes import pages
 
 logging.basicConfig(
     level=logging.INFO,
@@ -73,7 +73,6 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
     app.include_router(pages.router)
-    app.include_router(api.router)
 
     if settings.bot_enabled:
         from .routes import telegram

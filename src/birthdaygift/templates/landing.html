@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}birthdaygift{% endblock %}
+
+{% block head %}
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="{{ lede }}">
+{% endblock %}
+
+{% block body %}
+<canvas id="sky" aria-hidden="true"></canvas>
+<main data-candles="0" data-light="{{ '1' if theme.light else '0' }}">
+  <div class="eyebrow">birthdaygift</div>
+  <h1>{{ title }}</h1>
+  <article class="letter">
+    <p>{{ lede }}</p>
+    <p>{{ how }}</p>
+  </article>
+  <p class="note">
+    {% if bot_url %}<a href="{{ bot_url }}">{{ bot_url }}</a><br>{% endif %}
+    <a href="https://github.com/gaspiralli97/birthdaygift">github.com/gaspiralli97/birthdaygift</a>
+  </p>
+</main>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', path='/js/card.js') }}" defer></script>
+{% endblock %}
