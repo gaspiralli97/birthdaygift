@@ -94,6 +94,17 @@ files = ["src", "tests"]
 module = ["aiogram.*"]
 follow_untyped_imports = true
 
+# Strict typing earns its keep in the application. In the tests every function
+# takes pytest fixtures, so the same rules would mean annotating each fixture
+# at each use for no defect caught.
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+disallow_any_generics = false
+warn_unused_ignores = false
+
 # ---------------------------------------------------------------------------
 
 [tool.pytest.ini_options]

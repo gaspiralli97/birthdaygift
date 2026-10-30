@@ -94,9 +94,17 @@ THEMES: dict[ThemeKey, Theme] = {
 }
 
 
-def get_theme(key: str | None) -> Theme:
-    return THEMES.get(key, THEMES[DEFAULT_THEME])  # type: ignore[arg-type]
-
-
 def normalize_theme(key: str | None) -> ThemeKey:
-    return key if key in THEME_KEYS else DEFAULT_THEME  # type: ignore[return-value]
+    """The colourway, or the default when the name is unknown.
+
+    Written as a loop rather than ``key if key in THEME_KEYS`` so the Literal
+    actually narrows; the membership test leaves it a plain ``str``.
+    """
+    for candidate in THEME_KEYS:
+        if key == candidate:
+            return candidate
+    return DEFAULT_THEME
+
+
+def get_theme(key: str | None) -> Theme:
+    return THEMES[normalize_theme(key)]

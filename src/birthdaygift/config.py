@@ -2,12 +2,9 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-TextProvider = Literal["template", "anthropic"]
 
 
 class Settings(BaseSettings):
@@ -23,10 +20,19 @@ class Settings(BaseSettings):
     database_path: Path = Path("./data/birthdaygift.db")
     card_ttl_days: int = Field(default=5, ge=1, le=365)
 
-    text_provider: TextProvider = "template"
+    #: The Claude Code CLI, which authenticates with the operator's own
+    #: subscription rather than a metered API key.
+    claude_bin: str = "claude"
+    claude_model: str = "sonnet"
+    letter_min_words: int = 60
+    letter_max_words: int = 110
 
     telegram_bot_token: str = ""
     telegram_webhook_secret: str = ""
+    #: Where both usage reports are delivered. Empty disables reporting.
+    telegram_owner_id: int = 0
+    #: Cards per digest. The weekly report covers whatever is left over.
+    report_every: int = 10
 
     rate_per_ip_per_day: int = Field(default=5, ge=1)
     rate_per_telegram_user_per_day: int = Field(default=3, ge=1)

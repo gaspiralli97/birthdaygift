@@ -39,7 +39,7 @@ class CardCreate(BaseModel):
     relation: Relation = "friend"
     field: WorkField = "other"
     lang: Lang = "uz"
-    theme: ThemeKey = "midnight"
+    theme: ThemeKey = "qora"
     details: Annotated[str, Field(max_length=600)] = ""
     from_name: Annotated[str, Field(max_length=40)] = ""
 

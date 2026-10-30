@@ -189,7 +189,10 @@ def age_fact(age: int | None, lang: str, field: str = DEFAULT_WORK_FIELD) -> Fac
     # when nothing better is on offer.
     numeric_is_interesting = numeric is not None and numeric.kind != "factors"
 
-    preference = _PREFERENCE.get(field, _PREFERENCE[DEFAULT_WORK_FIELD])  # type: ignore[arg-type]
+    preference = next(
+        (_PREFERENCE[known] for known in WORK_FIELDS if known == field),
+        _PREFERENCE[DEFAULT_WORK_FIELD],
+    )
     for kind in preference:
         if kind == "number":
             if numeric_is_interesting:

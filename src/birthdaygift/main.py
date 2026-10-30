@@ -15,8 +15,8 @@ from fastapi.staticfiles import StaticFiles
 from . import __version__
 from .config import get_settings
 from .db import create_all
-from .i18n import load_all, strings
-from .routes import pages
+from .i18n import load_all
+from .routes import pages, telegram
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,7 +44,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if settings.bot_enabled:
         from .bot import start_bot
 
-        app.state.bot_username = await start_bot(app)
+        try:
+            app.state.bot_username = await start_bot(app)
+        except Exception:
+            # A card page does not need the bot, and refusing to boot would
+            # take the published links down with it.
+            logger.exception("telegram failed to start; card pages still served")
     else:
         logger.info("telegram disabled (no token or secret); card pages still served")
 
@@ -73,22 +78,18 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
     app.include_router(pages.router)
-
-    if settings.bot_enabled:
-        from .routes import telegram
-
-        app.include_router(telegram.router)
+    # Registered whether or not a bot is configured: the endpoint refuses any
+    # call that does not carry the shared secret, and a missing secret refuses
+    # everything. Making its existence depend on configuration would turn a
+    # misconfigured deployment into a silent 404 instead of a clear refusal.
+    app.include_router(telegram.router)
 
     @app.exception_handler(RequestValidationError)
     async def _validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
-        # The form speaks the visitor's language, so the error should too.
-        body = exc.body if isinstance(exc.body, dict) else {}
-        lang = body.get("lang", "uz")
-        logger.info("validation rejected: %s", exc.errors()[:3])
-        return JSONResponse(
-            status_code=422,
-            content={"error": "validation", "message": strings(lang).form.error_name},
-        )
+        # Nothing public takes a body any more, so a validation failure means
+        # a malformed webhook or a probe. Log it and say nothing useful back.
+        logger.info("validation rejected on %s: %s", request.url.path, exc.errors()[:3])
+        return JSONResponse(status_code=422, content={"error": "validation"})
 
     @app.middleware("http")
     async def _security_headers(request: Request, call_next):  # type: ignore[no-untyped-def]

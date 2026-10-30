@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
+from typing import Any, cast
 
 from sqlalchemy import delete, select
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.orm import Session
 
 from .config import get_settings
@@ -98,7 +100,9 @@ def fetch(session: Session, card_id: str, *, count_view: bool = True) -> Card | 
 def purge_expired(session: Session) -> int:
     """Delete every card past its expiry. Returns the number removed."""
     now = dt.datetime.now(dt.UTC).replace(tzinfo=None)
-    result = session.execute(delete(Card).where(Card.expires_at <= now))
+    # Session.execute is typed as returning Result; a DML statement actually
+    # returns a CursorResult, which is the only kind that counts rows.
+    result = cast("CursorResult[Any]", session.execute(delete(Card).where(Card.expires_at <= now)))
     session.commit()
     removed = result.rowcount or 0
     if removed:

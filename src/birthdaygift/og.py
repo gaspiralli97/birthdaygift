@@ -191,7 +191,8 @@ def render_card_image(card: Card) -> bytes:
             fill=accent,
             anchor="lm",
         )
-        name_x = PAD + number_width + 56
+        # textbbox measures in floats; the layout works in whole pixels.
+        name_x = int(PAD + number_width + 56)
     else:
         name_x = PAD
 

@@ -39,9 +39,6 @@ class CardStrings(_Section):
     years: str
     months: str
     days: str
-    math_title: str
-    prime_one: str
-    prime_many: str
     expires_in: str
     from_line: str
     views: str
@@ -53,65 +50,47 @@ class ExpiredStrings(_Section):
     make_one: str
 
 
-class FormStrings(_Section):
+class LandingStrings(_Section):
     title: str
-    subtitle: str
-    how_it_works: str
-    lang_label: str
-    theme_label: str
-    name_label: str
-    name_placeholder: str
-    age_label: str
-    age_placeholder: str
-    relation_label: str
-    details_label: str
-    details_placeholder: str
-    details_hint: str
-    from_label: str
-    from_placeholder: str
-    submit: str
-    submitting: str
-    preview_title: str
-    result_title: str
-    result_hint: str
-    copy_button: str
-    copied: str
-    again: str
-    open_card: str
-    error_generic: str
-    error_rate: str
-    error_name: str
+    lede: str
+    how: str
 
 
 class BotStrings(_Section):
     start: str
     ask_lang: str
+    ask_theme: str
+    ask_mode: str
+    mode_self: str
+    mode_ai: str
     ask_name: str
     ask_age: str
     ask_relation: str
-    ask_theme: str
-    ask_details: str
+    ask_field: str
+    ask_brief: str
+    ask_letter: str
     ask_from: str
     working: str
     done: str
     expiry: str
     bad_name: str
     bad_age: str
-    limit_user: str
-    limit_global: str
+    bad_text: str
+    ai_failed: str
     failed: str
     cancelled: str
     unknown: str
-    skip_hint: str
+    again: str
 
 
 class Strings(_Section):
     card: CardStrings
     expired: ExpiredStrings
-    form: FormStrings
+    landing: LandingStrings
     bot: BotStrings
     relations: dict[str, str]
     themes: dict[str, str]
+    fields: dict[str, str]
     #: One title per lens (number, code, heart, …) and one note per fact kind.
     fact_titles: dict[str, str]
     fact_notes: dict[str, str]
@@ -131,7 +110,10 @@ def load_all() -> dict[str, Strings]:
 
 
 def normalize_lang(value: str | None) -> Lang:
-    return value if value in LANGUAGES else DEFAULT_LANG  # type: ignore[return-value]
+    for candidate in LANGUAGES:
+        if value == candidate:
+            return candidate
+    return DEFAULT_LANG
 
 
 #: Every arithmetic fact shares one title; the other lenses have their own.
