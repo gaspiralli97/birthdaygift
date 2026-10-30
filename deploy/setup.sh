@@ -45,6 +45,11 @@ sudo -u "$RUN_USER" /home/"$RUN_USER"/.local/bin/claude --version
 say "Directories"
 mkdir -p "$APP_DIR" "$DATA_DIR" "$ENV_DIR"
 chown -R "$RUN_USER:$RUN_USER" "$APP_DIR" "$DATA_DIR"
+# The env file is root-owned and group-readable by the service user, so the
+# directory has to be group-traversable by that same user or the file is
+# unreachable: systemd reads EnvironmentFile as root and would not notice,
+# but the migration step below runs as $RUN_USER and does.
+chown root:"$RUN_USER" "$ENV_DIR"
 chmod 750 "$ENV_DIR"
 
 say "Code"
