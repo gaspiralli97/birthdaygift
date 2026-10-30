@@ -33,6 +33,15 @@ if ! sudo -u "$RUN_USER" test -x "/home/$RUN_USER/.local/bin/uv"; then
 fi
 sudo -u "$RUN_USER" /home/"$RUN_USER"/.local/bin/uv --version
 
+say "Claude Code CLI"
+# This writes the letters, so CLAUDE_BIN has to exist before the operator can
+# authenticate it. The installer lands in ~/.local/bin/claude, which is where
+# the env file points and what the unit's PATH already covers.
+if ! sudo -u "$RUN_USER" test -x "/home/$RUN_USER/.local/bin/claude"; then
+  sudo -u "$RUN_USER" bash -c 'curl -fsSL https://claude.ai/install.sh | bash'
+fi
+sudo -u "$RUN_USER" /home/"$RUN_USER"/.local/bin/claude --version
+
 say "Directories"
 mkdir -p "$APP_DIR" "$DATA_DIR" "$ENV_DIR"
 chown -R "$RUN_USER:$RUN_USER" "$APP_DIR" "$DATA_DIR"
@@ -49,8 +58,18 @@ fi
 say "Dependencies"
 sudo -u "$RUN_USER" bash -lc "cd $APP_DIR && /home/$RUN_USER/.local/bin/uv sync --no-dev"
 
+# An env file from before the Python rewrite names none of the settings the
+# application now reads, so carrying it forward would boot the service with
+# nothing configured. SITE_URL is the marker: it tells the two schemas apart.
+# The file is moved aside rather than deleted, because it holds secrets.
+if [[ -f $ENV_DIR/env ]] && ! grep -q '^SITE_URL=' "$ENV_DIR/env"; then
+  carried=$(sed -n 's/^TELEGRAM_BOT_TOKEN=//p' "$ENV_DIR/env" | head -1)
+  mv "$ENV_DIR/env" "$ENV_DIR/env.superseded.$(date +%Y%m%d%H%M%S)"
+  say "Superseded a pre-rewrite $ENV_DIR/env (kept alongside as .superseded.*)"
+fi
+
 if [[ ! -f $ENV_DIR/env ]]; then
-  say "Writing $ENV_DIR/env — fill in the three secrets yourself"
+  say "Writing $ENV_DIR/env — fill in the two secrets yourself"
   cat > "$ENV_DIR/env" <<ENVEOF
 SITE_URL=https://$DOMAIN
 DATABASE_PATH=$DATA_DIR/birthdaygift.db
@@ -62,9 +81,10 @@ CLAUDE_BIN=/home/$RUN_USER/.local/bin/claude
 CLAUDE_MODEL=sonnet
 
 # From @BotFather.
-TELEGRAM_BOT_TOKEN=
-# Any random string. Telegram echoes it back on every webhook call.
-TELEGRAM_WEBHOOK_SECRET=
+TELEGRAM_BOT_TOKEN=${carried:-}
+# Telegram echoes this back on every webhook call and the endpoint refuses
+# anything without it. Generated here: a human choosing it adds nothing.
+TELEGRAM_WEBHOOK_SECRET=$(head -c 24 /dev/urandom | base64 | tr -d '/+=')
 # Your own Telegram id, where both usage reports are delivered.
 TELEGRAM_OWNER_ID=
 
@@ -114,7 +134,11 @@ install -m 644 "$APP_DIR/deploy/birthdaygift.service" /etc/systemd/system/birthd
 sed -i "s/^User=ubuntu$/User=$RUN_USER/; s/^Group=ubuntu$/Group=$RUN_USER/" \
   /etc/systemd/system/birthdaygift.service
 systemctl daemon-reload
-systemctl enable --now birthdaygift
+systemctl enable birthdaygift
+# restart, not `enable --now`: on a re-run the unit is already active and
+# --now would leave the old revision serving, which is the one case this
+# script exists for.
+systemctl restart birthdaygift
 sleep 3
 systemctl is-active birthdaygift
 
@@ -129,8 +153,7 @@ fi
 say "Done"
 echo "  https://$DOMAIN"
 echo
-echo "Still to do, by hand:"
+echo "Still to do, by hand — both need a person, not a script:"
 echo "  1. sudo -u $RUN_USER /home/$RUN_USER/.local/bin/claude setup-token"
-echo "  2. put TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET and"
-echo "     TELEGRAM_OWNER_ID into $ENV_DIR/env"
+echo "  2. put TELEGRAM_BOT_TOKEN and TELEGRAM_OWNER_ID into $ENV_DIR/env"
 echo "  3. sudo systemctl restart birthdaygift"
