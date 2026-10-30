@@ -148,12 +148,16 @@ sleep 3
 systemctl is-active birthdaygift
 
 say "TLS certificate"
-if [[ ! -d /etc/letsencrypt/live/$DOMAIN ]]; then
-  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
-    --register-unsafely-without-email --redirect
-else
-  echo "certificate already present"
-fi
+# Unconditionally, every run. The vhost installed above listens on 80 only -
+# the 443 server block and the redirect are certbot's work - so skipping this
+# when a certificate already exists took the site off HTTPS entirely, which
+# is the one thing a re-run must not do. --keep-until-expiring means an
+# existing certificate is reused rather than reissued, so this costs nothing
+# against the rate limit; it is here for the nginx half, not the cert half.
+certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
+  --register-unsafely-without-email --redirect --keep-until-expiring
+nginx -t
+systemctl reload nginx
 
 say "Done"
 echo "  https://$DOMAIN"
