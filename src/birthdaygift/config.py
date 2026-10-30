@@ -44,6 +44,20 @@ class Settings(BaseSettings):
     def _strip_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")
 
+    @field_validator("telegram_owner_id", mode="before")
+    @classmethod
+    def _blank_owner_disables(cls, value: object) -> object:
+        """``TELEGRAM_OWNER_ID=`` means no reports, not a malformed integer.
+
+        An env file states a disabled setting by leaving it empty, which is
+        what `.env.example` and the provisioning script both ship. Pydantic
+        reads that as the string ``""`` and refuses it, so the documented way
+        to turn reporting off would fail the boot instead.
+        """
+        if isinstance(value, str) and not value.strip():
+            return 0
+        return value
+
     @property
     def bot_enabled(self) -> bool:
         """The bot needs both halves: a token to call out, a secret to be called."""
