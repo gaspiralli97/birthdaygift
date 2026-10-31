@@ -22,8 +22,8 @@
   data-candles="{{ candles }}"
   data-light="{{ '1' if theme.light else '0' }}"
   data-confetti="{{ theme.confetti_css }}"
-  data-lit-label="{{ candles }} {{ s.lit_label }}"
-  data-out-label="{{ candles }} {{ s.out_label }}"
+  data-lit-label="{{ candles }} {{ s.lit_label.pick(lang, candles) }}"
+  data-out-label="{{ candles }} {{ s.out_label.pick(lang, candles) }}"
   data-blow-label="{{ s.blow }}"
   data-relight-label="{{ s.relight }}"
   data-hint="{{ s.hint }}"
@@ -37,7 +37,7 @@
 
   <h1>{{ s.happy }}<br><em>{{ card.name }}</em></h1>
 
-  <div class="candles" id="candles" aria-label="{{ candles }} {{ s.lit_label }}"></div>
+  <div class="candles" id="candles" aria-label="{{ candles }} {{ s.lit_label.pick(lang, candles) }}"></div>
   <button class="blow" id="blow" type="button">{{ s.blow }}</button>
   <div class="hint" id="hint">{{ s.hint }}</div>
 
@@ -51,10 +51,12 @@
   </article>
 
   {% if card.age %}
+    {% set months = card.age * 12 %}
+    {% set days = card.age | lived_days %}
     <section class="ledger" aria-label="{{ s.eyebrow }}">
-      <div><b>{{ card.age }}</b><span>{{ s.years }}</span></div>
-      <div><b>{{ (card.age * 12) | thousands }}</b><span>{{ s.months }}</span></div>
-      <div><b>{{ card.age | lived_days | thousands }}</b><span>{{ s.days }}</span></div>
+      <div><b>{{ card.age }}</b><span>{{ s.years.pick(lang, card.age) }}</span></div>
+      <div><b>{{ months | thousands }}</b><span>{{ s.months.pick(lang, months) }}</span></div>
+      <div><b>{{ days | thousands }}</b><span>{{ s.days.pick(lang, days) }}</span></div>
     </section>
   {% endif %}
 
@@ -67,8 +69,8 @@
   {% endif %}
 
   <p class="note">
-    {{ s.expires_in.format(days=days_left) }}
-    {%- if card.views > 1 %}<br>{{ s.views.format(count=card.views) }}{% endif %}
+    {{ s.expires_in.pick(lang, days_left).format(days=days_left) }}
+    {%- if card.views > 1 %}<br>{{ s.views.pick(lang, card.views).format(count=card.views) }}{% endif %}
   </p>
 </main>
 {% endblock %}

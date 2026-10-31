@@ -6,14 +6,35 @@
     "relight": "Light them again",
     "hint": "Make a wish first. Sound on 🔊",
     "wished": "Your wish is on its way ✨",
-    "lit_label": "lit candles",
-    "out_label": "candles, blown out",
-    "years": "years",
-    "months": "months",
-    "days": "days",
-    "expires_in": "This link disappears in {days} days.",
+    "lit_label": {
+      "one": "lit candle",
+      "other": "lit candles"
+    },
+    "out_label": {
+      "one": "candle, blown out",
+      "other": "candles, blown out"
+    },
+    "years": {
+      "one": "year",
+      "other": "years"
+    },
+    "months": {
+      "one": "month",
+      "other": "months"
+    },
+    "days": {
+      "one": "day",
+      "other": "days"
+    },
+    "expires_in": {
+      "one": "This link disappears in {days} day.",
+      "other": "This link disappears in {days} days."
+    },
     "from_line": "From {name}",
-    "views": "opened {count} times"
+    "views": {
+      "one": "opened {count} time",
+      "other": "opened {count} times"
+    }
   },
   "expired": {
     "title": "This link has expired",

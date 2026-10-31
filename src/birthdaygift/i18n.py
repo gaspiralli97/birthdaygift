@@ -12,7 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal, get_args
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 Lang = Literal["uz", "en", "ko", "ru"]
 LANGUAGES: tuple[Lang, ...] = get_args(Lang)
@@ -20,11 +20,83 @@ DEFAULT_LANG: Lang = "uz"
 
 _DIR = Path(__file__).parent / "translations"
 
+PluralCategory = Literal["one", "few", "many", "other"]
+
+
+def plural_category(lang: str, count: int) -> PluralCategory:
+    """Which form `lang` needs for `count`, following the CLDR rules.
+
+    Only the four languages this service speaks are covered, because a card is
+    rendered in one of them and nothing else ever reaches here.
+    """
+    n = abs(count)
+    if lang == "ru":
+        # 1, 21, 31 take the singular; 2-4 a second form; 11-14 and the rest a
+        # third. Getting this wrong is the kind of mistake a reader hears.
+        if n % 10 == 1 and n % 100 != 11:
+            return "one"
+        if 2 <= n % 10 <= 4 and not 12 <= n % 100 <= 14:
+            return "few"
+        return "many"
+    if lang == "en":
+        return "one" if n == 1 else "other"
+    # Uzbek and Korean do not inflect a noun after a numeral.
+    return "other"
+
 
 class _Section(BaseModel):
     """Base for every copy section: an unknown key is a mistake, not an extra."""
 
     model_config = ConfigDict(extra="forbid")
+
+
+class Plural(_Section):
+    """A phrase that carries a number and may inflect with it.
+
+    A bare JSON string means the phrase never changes, which is the whole
+    truth for Uzbek and Korean; an object spells out one form per category.
+    Every form is optional because no language uses all four: English writes
+    `one` and `other`, Russian writes `one`, `few` and `many` and never needs
+    `other` at all, since that category only arises for fractions and a count
+    here is always a whole number of candles, months or days.
+
+    Which forms a language actually has to supply is not checked here - it
+    depends on the rule, not the file - so `tests/test_plurals.py` walks every
+    count the card can show and asserts the form it selects exists.
+    """
+
+    one: str | None = None
+    few: str | None = None
+    many: str | None = None
+    other: str | None = None
+
+    #: Tried in turn when a category has no form, commonest first. Reaching
+    #: past the first entry means a file is incomplete, which the test above
+    #: is there to catch; rendering a slightly wrong noun still beats a 500
+    #: on somebody's birthday card.
+    _FALLBACK = ("other", "many", "few", "one")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _accept_a_bare_string(cls, value: object) -> object:
+        return {"other": value} if isinstance(value, str) else value
+
+    @model_validator(mode="after")
+    def _at_least_one_form(self) -> Plural:
+        if not any(getattr(self, name) for name in self._FALLBACK):
+            raise ValueError("a plural phrase needs at least one form")
+        return self
+
+    def pick(self, lang: str, count: int) -> str:
+        """The form `lang` needs for `count`."""
+        chosen: str | None = getattr(self, plural_category(lang, count))
+        if chosen is not None:
+            return chosen
+        for name in self._FALLBACK:
+            fallback: str | None = getattr(self, name)
+            if fallback is not None:
+                return fallback
+        raise AssertionError("unreachable: the validator requires a form")  # pragma: no cover
 
 
 class CardStrings(_Section):
@@ -34,14 +106,15 @@ class CardStrings(_Section):
     relight: str
     hint: str
     wished: str
-    lit_label: str
-    out_label: str
-    years: str
-    months: str
-    days: str
-    expires_in: str
+    #: Every one of these sits next to a number, so each one inflects.
+    lit_label: Plural
+    out_label: Plural
+    years: Plural
+    months: Plural
+    days: Plural
+    expires_in: Plural
     from_line: str
-    views: str
+    views: Plural
 
 
 class ExpiredStrings(_Section):
