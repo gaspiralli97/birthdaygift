@@ -14,9 +14,18 @@ from typing import Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
+from .facts import WORK_FIELDS, WorkField
+from .themes import THEME_KEYS, ThemeKey
+
 Lang = Literal["uz", "en", "ko", "ru"]
 LANGUAGES: tuple[Lang, ...] = get_args(Lang)
 DEFAULT_LANG: Lang = "uz"
+
+#: How the sender knows the recipient. It lives here rather than with the card
+#: schema because the register of a letter in Uzbek and Russian turns on it,
+#: which makes it a copy concern first and a field second.
+Relation = Literal["friend", "classmate", "colleague", "family", "other"]
+RELATIONS: tuple[Relation, ...] = get_args(Relation)
 
 _DIR = Path(__file__).parent / "translations"
 
@@ -163,12 +172,37 @@ class Strings(_Section):
     expired: ExpiredStrings
     landing: LandingStrings
     bot: BotStrings
-    relations: dict[str, str]
-    themes: dict[str, str]
-    fields: dict[str, str]
+    # Keyed by the literal types rather than by `str`, so a file that names a
+    # colourway the application does not have - or misses one it does - fails
+    # at startup instead of at the moment a keyboard is built. Left loose,
+    # these three dicts were the hole the theme rename fell through: the keys
+    # stayed `midnight`/`paper`/`neon` long after the themes became
+    # `qora`/`vino`/`qaymoq`, and nothing noticed until a button was tapped.
+    relations: dict[Relation, str]
+    themes: dict[ThemeKey, str]
+    fields: dict[WorkField, str]
     #: One title per lens (number, code, heart, …) and one note per fact kind.
     fact_titles: dict[str, str]
     fact_notes: dict[str, str]
+
+    @model_validator(mode="after")
+    def _no_choice_goes_unlabelled(self) -> Strings:
+        """Every key the application offers has copy in every language.
+
+        The typed dicts above reject a key that does not exist; this catches
+        the other half, a key that exists and was never translated. Both
+        matter because each of these three sets is rendered as a keyboard, and
+        a keyboard is built by looking up every key at once.
+        """
+        for name, expected in (
+            ("relations", RELATIONS),
+            ("themes", THEME_KEYS),
+            ("fields", WORK_FIELDS),
+        ):
+            missing = sorted(set(expected) - set(getattr(self, name)))
+            if missing:
+                raise ValueError(f"{name} has no label for {missing}")
+        return self
 
 
 @lru_cache

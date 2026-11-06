@@ -77,9 +77,9 @@
     "other": "Other"
   },
   "themes": {
-    "midnight": "Midnight",
-    "paper": "Paper",
-    "neon": "Neon"
+    "qora": "Near-black",
+    "vino": "Burgundy",
+    "qaymoq": "Champagne"
   },
   "fact_titles": {
     "number": "A little arithmetic",

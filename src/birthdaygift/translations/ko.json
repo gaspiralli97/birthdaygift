@@ -56,9 +56,9 @@
     "other": "기타"
   },
   "themes": {
-    "midnight": "한밤",
-    "paper": "종이",
-    "neon": "네온"
+    "qora": "블랙",
+    "vino": "버건디",
+    "qaymoq": "샴페인"
   },
   "fact_titles": {
     "number": "작은 산수",

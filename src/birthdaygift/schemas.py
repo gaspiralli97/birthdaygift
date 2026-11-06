@@ -7,16 +7,13 @@ cannot drift apart on what counts as valid input.
 from __future__ import annotations
 
 import re
-from typing import Annotated, Literal, get_args
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .facts import WorkField
-from .i18n import Lang
+from .i18n import Lang, Relation
 from .themes import ThemeKey
-
-Relation = Literal["friend", "classmate", "colleague", "family", "other"]
-RELATIONS: tuple[Relation, ...] = get_args(Relation)
 
 _WHITESPACE = re.compile(r"\s+")
 

@@ -33,8 +33,8 @@ from . import ai, cards, usage
 from .config import get_settings
 from .db import session_scope
 from .facts import WORK_FIELDS
-from .i18n import LANGUAGES, strings
-from .schemas import RELATIONS, CardCreate
+from .i18n import LANGUAGES, RELATIONS, strings
+from .schemas import CardCreate
 from .themes import THEME_KEYS
 
 logger = logging.getLogger(__name__)
