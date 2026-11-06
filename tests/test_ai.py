@@ -154,3 +154,52 @@ def test_the_prompt_never_reaches_argv(monkeypatch: pytest.MonkeyPatch) -> None:
     """It carries a third party's private memories; argv is world-readable."""
     argv = _capture_argv(monkeypatch)[0]
     assert not any("a prompt" in part for part in argv)
+
+
+SIGNED = (
+    "30 yosh - shaxmat taxtasining yarmi, Sardor.\n\n"
+    "Navbatdagi yurish seniki. Men kutib turaman.\n\n"
+    "Ismoil"
+)
+
+
+def test_a_signature_paragraph_is_dropped() -> None:
+    """The card prints its own `from` line, so the model's would double it.
+
+    Taken from a real reply: the prompt forbids a signature and the model
+    appended one anyway.
+    """
+    paragraphs = _clean(SIGNED, "Ismoil")
+    assert len(paragraphs) == 2
+    assert paragraphs[-1].endswith("Men kutib turaman.")
+
+
+@pytest.mark.parametrize(
+    "sign_off", ["Ismoil", "— Ismoil", "- Ismoil", "Ismoildan", "ISMOIL", "Ismoil."]
+)
+def test_the_sign_off_is_dropped_however_it_is_written(sign_off: str) -> None:
+    paragraphs = _clean(f"A letter here.\n\nAnd a closing line.\n\n{sign_off}", "Ismoil")
+    assert paragraphs == ["A letter here.", "And a closing line."]
+
+
+def test_a_sign_off_on_the_last_line_is_trimmed_too() -> None:
+    """Single newlines collapse into spaces, so it arrives mid-paragraph."""
+    paragraphs = _clean("A letter here.\n\nMen kutib turaman.\nIsmoil", "Ismoil")
+    assert paragraphs == ["A letter here.", "Men kutib turaman."]
+
+
+def test_a_closing_sentence_using_the_name_survives() -> None:
+    """Only a short trailing paragraph is a signature; a sentence is not."""
+    closing = "Ismoil har yili shuni aytadi va har yili rost bo'lib chiqadi."
+    paragraphs = _clean(f"A letter here.\n\n{closing}", "Ismoil")
+    assert paragraphs == ["A letter here.", closing]
+
+
+def test_nothing_is_dropped_when_the_sender_is_anonymous() -> None:
+    paragraphs = _clean("A letter here.\n\nAnd a closing line.", "")
+    assert paragraphs == ["A letter here.", "And a closing line."]
+
+
+def test_a_letter_that_is_only_a_name_is_left_alone() -> None:
+    """Stripping it would leave nothing, and nothing is worse than odd."""
+    assert _clean("Ismoil", "Ismoil") == ["Ismoil"]

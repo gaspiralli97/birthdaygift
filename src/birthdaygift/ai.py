@@ -175,7 +175,38 @@ def build_prompt(brief: Brief) -> str:
     )
 
 
-def _clean(raw: str) -> list[str]:
+def _strip_signature(paragraphs: list[str], from_name: str) -> list[str]:
+    """Drop a sign-off, which the card adds itself.
+
+    The prompt says not to write one and the model mostly obeys, but it is
+    also told the sender's name, and a letter wants to end with it. When it
+    does, the card shows the name twice: once as the model's last line, once
+    as the card's own `from` line underneath.
+
+    Only a *short* trailing paragraph counts, so a closing sentence that
+    happens to use the name is left alone.
+    """
+    name = from_name.strip()
+    if not name or len(paragraphs) < 2:
+        return paragraphs
+
+    last = paragraphs[-1]
+    folded, lowered = last.casefold(), name.casefold()
+    if lowered in folded and len(last) <= len(name) + 12:
+        return paragraphs[:-1]
+
+    # The same sign-off, arriving on its own line rather than its own
+    # paragraph: single newlines are collapsed into spaces further up, so it
+    # ends up tacked onto the final sentence instead.
+    trailing = re.compile(rf"(?<=[.!?…])\s+[-–—]?\s*{re.escape(name)}[.,!]?$", re.IGNORECASE)
+    trimmed = trailing.sub("", last).rstrip()
+    if trimmed and trimmed != last:
+        return [*paragraphs[:-1], trimmed]
+
+    return paragraphs
+
+
+def _clean(raw: str, from_name: str = "") -> list[str]:
     """Split the model's reply into paragraphs, dropping anything around it."""
     text = raw.strip()
 
@@ -193,7 +224,7 @@ def _clean(raw: str) -> list[str]:
     if len(paragraphs) > 1 and paragraphs[0].endswith(":") and len(paragraphs[0]) < 90:
         paragraphs = paragraphs[1:]
 
-    return paragraphs
+    return _strip_signature(paragraphs, from_name)
 
 
 def _resolve_binary() -> str | None:
@@ -220,7 +251,7 @@ async def write_letter(brief: Brief) -> list[str] | None:
     if raw is None:
         return None
 
-    paragraphs = _clean(raw)
+    paragraphs = _clean(raw, brief.from_name)
     if not paragraphs:
         logger.error("claude returned nothing usable")
         return None
