@@ -40,10 +40,14 @@ from .themes import THEME_KEYS
 logger = logging.getLogger(__name__)
 
 #: The language step is the only one a sender meets before the bot knows which
-#: language to speak, so it says nothing and shows a flag instead. English gets
-#: the Union Jack because a language has no flag of its own and that is the
-#: one readers expect.
+#: language to speak. A flag is read at a glance and needs no language to say
+#: it in; the name next to it is what a screen reader announces, and what
+#: settles the flag's ambiguity - English gets the Union Jack because a
+#: language has no flag of its own, and the word is what makes that read as
+#: "English" rather than "the United Kingdom".
 LANGUAGE_FLAGS = {"uz": "🇺🇿", "en": "🇬🇧", "ko": "🇰🇷", "ru": "🇷🇺"}
+#: Each in its own language: a sender looking for Korean is looking for 한국어.
+LANGUAGE_NAMES = {"uz": "O‘zbekcha", "en": "English", "ko": "한국어", "ru": "Русский"}
 
 #: Copy before a language is chosen has to be in some language; Uzbek is the
 #: one the people this was built for share.
@@ -76,10 +80,15 @@ def _rows(
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
+def language_label(code: str) -> str:
+    """Flag first, then the name - one button a reader and a screen reader
+    both get something from."""
+    return f"{LANGUAGE_FLAGS[code]} {LANGUAGE_NAMES[code]}"
+
+
 def _lang_keyboard() -> InlineKeyboardMarkup:
-    # All four on one row: a flag is narrow, and four of them read as a set of
-    # choices rather than a list.
-    return _rows([(code, LANGUAGE_FLAGS[code]) for code in LANGUAGES], "lang", per_row=4)
+    # Two per row: with a name alongside, four across would wrap on a phone.
+    return _rows([(code, language_label(code)) for code in LANGUAGES], "lang")
 
 
 def _theme_keyboard(lang: str) -> InlineKeyboardMarkup:
