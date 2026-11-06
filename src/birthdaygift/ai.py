@@ -259,6 +259,12 @@ def _child_environment() -> dict[str, str]:
         "TZ",
         "XDG_CONFIG_HOME",
         "XDG_CACHE_HOME",
+        # The other way the CLI can authenticate, and the only one that works
+        # on a host nobody logs into: `claude setup-token` mints a long-lived
+        # token and the CLI reads it from here. Without it in this list the
+        # allow-list would strip the credential and the letter would fail with
+        # the service otherwise configured correctly.
+        "CLAUDE_CODE_OAUTH_TOKEN",
     )
     return {name: parent[name] for name in keep if name in parent}
 

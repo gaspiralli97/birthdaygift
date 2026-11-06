@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
+
+from birthdaygift import ai
 from birthdaygift.ai import Brief, _clean, build_prompt
 
 
@@ -70,3 +73,24 @@ def test_a_letter_that_merely_ends_in_a_colon_is_kept() -> None:
 
 def test_nothing_usable_comes_back_as_nothing() -> None:
     assert _clean("   \n\n  ") == []
+
+
+def test_the_cli_credential_survives_the_environment_filter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The child environment is an allow-list, so the token has to be on it.
+
+    On a host nobody logs into, a minted token is the only way the CLI
+    authenticates; stripping it leaves the service looking correctly
+    configured and every letter failing.
+    """
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "sk-ant-oat-test")
+    assert ai._child_environment()["CLAUDE_CODE_OAUTH_TOKEN"] == "sk-ant-oat-test"
+
+
+def test_the_bot_token_does_not_reach_the_letter_writer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The point of the allow-list: a secret the CLI has no use for stays out."""
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "8123:secret")
+    assert "TELEGRAM_BOT_TOKEN" not in ai._child_environment()
