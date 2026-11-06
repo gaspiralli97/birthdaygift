@@ -39,7 +39,11 @@ from .themes import THEME_KEYS
 
 logger = logging.getLogger(__name__)
 
-LANGUAGE_NAMES = {"uz": "O‘zbekcha", "en": "English", "ko": "한국어", "ru": "Русский"}
+#: The language step is the only one a sender meets before the bot knows which
+#: language to speak, so it says nothing and shows a flag instead. English gets
+#: the Union Jack because a language has no flag of its own and that is the
+#: one readers expect.
+LANGUAGE_FLAGS = {"uz": "🇺🇿", "en": "🇬🇧", "ko": "🇰🇷", "ru": "🇷🇺"}
 
 #: Copy before a language is chosen has to be in some language; Uzbek is the
 #: one the people this was built for share.
@@ -73,7 +77,9 @@ def _rows(
 
 
 def _lang_keyboard() -> InlineKeyboardMarkup:
-    return _rows([(code, LANGUAGE_NAMES[code]) for code in LANGUAGES], "lang")
+    # All four on one row: a flag is narrow, and four of them read as a set of
+    # choices rather than a list.
+    return _rows([(code, LANGUAGE_FLAGS[code]) for code in LANGUAGES], "lang", per_row=4)
 
 
 def _theme_keyboard(lang: str) -> InlineKeyboardMarkup:

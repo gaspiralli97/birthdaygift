@@ -35,6 +35,22 @@ def test_the_language_keyboard_offers_every_language() -> None:
     assert {b.callback_data for b in buttons} == {f"lang:{lang}" for lang in LANGUAGES}
 
 
+def test_the_language_keyboard_shows_flags_and_no_words() -> None:
+    """Before a language is picked the bot has none to write in, so it writes
+    nothing: every button is a flag, and they sit on one row."""
+    rows = bot._lang_keyboard().inline_keyboard
+    assert len(rows) == 1
+    for button in rows[0]:
+        assert button.text in set(bot.LANGUAGE_FLAGS.values())
+        # A regional-indicator pair and nothing else.
+        assert len(button.text) == 2
+        assert all(0x1F1E6 <= ord(ch) <= 0x1F1FF for ch in button.text)
+
+
+def test_every_language_has_a_flag() -> None:
+    assert set(bot.LANGUAGE_FLAGS) == set(LANGUAGES)
+
+
 @pytest.mark.parametrize("lang", LANGUAGES)
 @pytest.mark.parametrize(
     ("section", "keys", "prefix"),
