@@ -75,7 +75,10 @@ failures=0
 # 1. The site answers, over the real URL rather than through the loopback, so
 #    nginx and the certificate are covered as well as the application.
 if [[ -n $SITE_URL ]]; then
-  code=$(curl -sS -m "$TIMEOUT" -o /dev/null -w '%{http_code}' "$SITE_URL/healthz" || echo 000)
+  # curl already writes 000 when it cannot connect, and also exits non-zero;
+  # a `|| echo 000` on top of that appends a second one and reports `000000`.
+  code=$(curl -sS -m "$TIMEOUT" -o /dev/null -w '%{http_code}' "$SITE_URL/healthz" 2>/dev/null || true)
+  code=${code:-000}
   if [[ $code == 200 ]]; then
     recovered site
   else

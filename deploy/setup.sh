@@ -159,7 +159,11 @@ sed -i "s#/home/ubuntu/#/home/$RUN_USER/#g" \
 mkdir -p "$DATA_DIR/healthcheck"
 chown -R "$RUN_USER:$RUN_USER" "$DATA_DIR/healthcheck"
 systemctl daemon-reload
-systemctl enable --now birthdaygift-healthcheck.timer
+# Enabled here, started after certbot. Starting it now would fire a check
+# against a vhost that has not had its 443 half installed yet, and alert the
+# operator that the site is down in the middle of bringing the site up. A
+# monitor that cries wolf on every deploy is a monitor that gets muted.
+systemctl enable birthdaygift-healthcheck.timer
 
 say "TLS certificate"
 # Unconditionally, every run. The vhost installed above listens on 80 only -
@@ -172,6 +176,10 @@ certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos \
   --register-unsafely-without-email --redirect --keep-until-expiring
 nginx -t
 systemctl reload nginx
+
+# Now that 443 is actually serving, the monitor can start without its first
+# check being a false alarm.
+systemctl restart birthdaygift-healthcheck.timer
 
 say "Done"
 echo "  https://$DOMAIN"
