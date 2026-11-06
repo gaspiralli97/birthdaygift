@@ -147,6 +147,20 @@ systemctl restart birthdaygift
 sleep 3
 systemctl is-active birthdaygift
 
+say "Health check timer"
+install -m 644 "$APP_DIR/deploy/birthdaygift-healthcheck.service" \
+  /etc/systemd/system/birthdaygift-healthcheck.service
+install -m 644 "$APP_DIR/deploy/birthdaygift-healthcheck.timer" \
+  /etc/systemd/system/birthdaygift-healthcheck.timer
+sed -i "s/^User=ubuntu$/User=$RUN_USER/; s/^Group=ubuntu$/Group=$RUN_USER/" \
+  /etc/systemd/system/birthdaygift-healthcheck.service
+sed -i "s#/home/ubuntu/#/home/$RUN_USER/#g" \
+  /etc/systemd/system/birthdaygift-healthcheck.service
+mkdir -p "$DATA_DIR/healthcheck"
+chown -R "$RUN_USER:$RUN_USER" "$DATA_DIR/healthcheck"
+systemctl daemon-reload
+systemctl enable --now birthdaygift-healthcheck.timer
+
 say "TLS certificate"
 # Unconditionally, every run. The vhost installed above listens on 80 only -
 # the 443 server block and the redirect are certbot's work - so skipping this
@@ -164,5 +178,12 @@ echo "  https://$DOMAIN"
 echo
 echo "Still to do, by hand — both need a person, not a script:"
 echo "  1. sudo -u $RUN_USER /home/$RUN_USER/.local/bin/claude setup-token"
+echo "     then put what it prints into $ENV_DIR/env as CLAUDE_CODE_OAUTH_TOKEN"
+echo "     (it stores the token nowhere, and shows it once)"
 echo "  2. put TELEGRAM_BOT_TOKEN and TELEGRAM_OWNER_ID into $ENV_DIR/env"
 echo "  3. sudo systemctl restart birthdaygift"
+echo
+echo "The health check runs every 15 minutes and messages TELEGRAM_OWNER_ID if"
+echo "the site stops answering or the letter writer stops authenticating:"
+echo "  systemctl list-timers birthdaygift-healthcheck.timer"
+echo "  sudo -u $RUN_USER $APP_DIR/deploy/healthcheck.sh   # run one now"

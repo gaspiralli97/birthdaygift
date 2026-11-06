@@ -7,6 +7,16 @@ link is gone.
 
 **Live:** https://151-145-79-228.sslip.io
 
+![Three cards: the same page in each colourway, each in a different language,
+each with a different observation about the
+age](docs/colourways.png)
+
+<sup>The three colourways, in three of the four languages. The line under each
+letter is computed from the age and the person's field, so no two cards make
+the same remark: 28 is a perfect number, 30 is `0b11110` to someone who writes
+software, and 41 years is about 1.5 billion heartbeats to someone in
+medicine.</sup>
+
 ---
 
 ## Why the card is a link and the bot is the only way to make one
@@ -126,7 +136,7 @@ Without `TELEGRAM_BOT_TOKEN` the bot stays off and the card pages still
 serve, which is the useful mode for working on the page.
 
 ```bash
-uv run pytest        # 67 tests
+uv run pytest        # 165 tests
 uv run ruff check .
 uv run mypy          # strict across the application
 ```
@@ -139,14 +149,52 @@ Ubuntu 24.04, arm64 or x86:
 sudo DOMAIN=your-host.example bash deploy/setup.sh
 ```
 
-It installs uv, nginx, certbot and a CJK font, provisions the service, opens
-80/443 in the local firewall, issues a certificate and starts the unit. Three
-things are left for a human, and the script says so when it finishes:
-`claude setup-token`, the three secrets in `/etc/birthdaygift/env`, and a
-restart. Secrets are never read from, or committed to, this repository.
+It installs uv, the Claude Code CLI, nginx, certbot and a CJK font, provisions
+the service, opens 80/443 in the local firewall, issues a certificate and
+restarts the unit. Re-run it to deploy a new revision; it is idempotent, and
+certbot runs every time because the vhost it installs listens on port 80 and
+the 443 half is certbot's work.
+
+Two things are left for a human, both needing a person rather than a script,
+and the script says so when it finishes: `claude setup-token`, and
+`TELEGRAM_BOT_TOKEN` plus `TELEGRAM_OWNER_ID` in `/etc/birthdaygift/env`. The
+webhook secret is generated. Secrets are never read from, or committed to,
+this repository.
+
+`claude setup-token` prints a year-long token and stores it nowhere, so it
+goes into the same env file as `CLAUDE_CODE_OAUTH_TOKEN`. That matters more
+than it looks: nothing fails loudly when it lapses — the letter writer simply
+starts offering to let the sender write their own. `deploy/healthcheck.sh`
+below exists mostly to catch that.
 
 On Oracle Cloud the VCN security list has to allow 80/443 as well; the host
 firewall alone is not enough.
+
+## Watching it
+
+`deploy/healthcheck.sh` runs on a systemd timer every fifteen minutes and
+checks two things, picked because they fail so differently:
+
+- **The site answers**, fetched over the public URL rather than the loopback,
+  so nginx and the certificate are covered along with the application.
+- **The letter writer can still authenticate**, by asking the CLI for one
+  word.
+
+The second is the one worth having. A dead site is obvious to anybody who
+looks at it. An expired CLI token is invisible: the bot stays up, the cards
+keep serving, and the only symptom is that every sender who asks for a written
+letter is quietly handed the "write it yourself" path instead. Nobody reports
+that, so something has to go looking for it.
+
+Failures go to `TELEGRAM_OWNER_ID` through the bot that is already configured,
+and are rate-limited to one message per failing check per twelve hours — a
+check that alerts every fifteen minutes is a check that gets muted. Recovery
+clears the marker and says so.
+
+```bash
+systemctl list-timers birthdaygift-healthcheck.timer
+sudo -u ubuntu /opt/birthdaygift/deploy/healthcheck.sh   # run one now
+```
 
 ## Stack
 
@@ -171,7 +219,8 @@ src/birthdaygift/
   usage.py       the record of who used it, and both reports
   scheduler.py   hourly upkeep and the weekly report
   routes/        card, preview image, landing page, webhook
-deploy/          systemd unit, nginx vhost, provisioning script
+deploy/          systemd units, nginx vhost, provisioning, health check
+docs/            the screenshots this README uses
 reference/       the prototypes the design came from
 ```
 

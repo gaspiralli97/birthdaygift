@@ -1,0 +1,18 @@
+[Unit]
+Description=birthdaygift - check the site answers and the letter writer can authenticate
+Documentation=https://github.com/gaspiralli97/birthdaygift
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Same user as the service: the check runs the Claude Code CLI, which reads
+# the same credentials, and writes its state next to the database.
+User=ubuntu
+Group=ubuntu
+Environment=PATH=/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/opt/birthdaygift/deploy/healthcheck.sh
+
+NoNewPrivileges=true
+PrivateTmp=true
+LockPersonality=true
+MemoryMax=512M
