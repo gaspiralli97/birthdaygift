@@ -269,6 +269,43 @@ def _child_environment() -> dict[str, str]:
     return {name: parent[name] for name in keep if name in parent}
 
 
+#: What the session is not allowed to do, as flags.
+#:
+#: The letter is written from text a stranger typed, so the session is assumed
+#: to be carrying an injected instruction and is given nothing to carry it out
+#: with. That matters more than it used to: the CLI now authenticates with a
+#: year-long token taken from the environment, and a session that can run a
+#: command or fetch a URL is a session that can read its own environment and
+#: send the token somewhere. HOME is on the allow-list too, so ~/.claude is
+#: equally reachable - no credential store is safe once a tool is.
+#:
+#: Three independent layers, because one flag is one typo away from nothing:
+#:
+#: - ``--tools ""`` is the documented way to disable the whole built-in set.
+#: - ``--restricted`` strips the command-running tools and WebFetch on its own,
+#:   ignores user, project and local settings, confines the file tools to the
+#:   working directory, and refuses bypassPermissions. It holds even if the
+#:   list above is one day edited to name a tool.
+#: - ``--permission-prompts none`` denies, rather than asks, anything that
+#:   would need approval. Nobody is watching this session to answer.
+#:
+#: ``--strict-mcp-config`` and ``--setting-sources ""`` stop an MCP server or a
+#: settings file from handing any of it back.
+#:
+#: `tests/test_ai.py` asserts every one of these reaches argv, so the
+#: protection cannot quietly disappear in a refactor.
+SANDBOX_FLAGS: tuple[str, ...] = (
+    "--tools",
+    "",
+    "--restricted",
+    "--permission-prompts",
+    "none",
+    "--strict-mcp-config",
+    "--setting-sources",
+    "",
+)
+
+
 async def _run(binary: str, prompt: str) -> str | None:
     """One CLI invocation, with as little reachable from inside it as possible."""
     with tempfile.TemporaryDirectory(prefix="birthdaygift-") as scratch:
@@ -278,15 +315,7 @@ async def _run(binary: str, prompt: str) -> str | None:
                 "-p",
                 "--model",
                 get_settings().claude_model,
-                # The letter is written from text a stranger typed, so the
-                # session gets no tools at all: without them an injected
-                # instruction has nothing to reach for. The other two flags
-                # stop a settings file or an MCP server handing any back.
-                "--tools",
-                "",
-                "--strict-mcp-config",
-                "--setting-sources",
-                "",
+                *SANDBOX_FLAGS,
                 # The prompt goes in on stdin, not argv: it carries a third
                 # party's name, age and private memories, and argv is readable
                 # by anyone who can run `ps` on the box.

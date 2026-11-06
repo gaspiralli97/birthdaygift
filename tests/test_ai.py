@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 
 from birthdaygift import ai
@@ -94,3 +96,61 @@ def test_the_bot_token_does_not_reach_the_letter_writer(
     """The point of the allow-list: a secret the CLI has no use for stays out."""
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "8123:secret")
     assert "TELEGRAM_BOT_TOKEN" not in ai._child_environment()
+
+
+class _FakeProcess:
+    """Stands in for the CLI: returns one line and exits cleanly."""
+
+    returncode = 0
+
+    async def communicate(self, data: bytes | None = None) -> tuple[bytes, bytes]:
+        return b"A letter.", b""
+
+
+def _capture_argv(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, ...]]:
+    """Run `_run` against a stub and hand back the argv it would have used."""
+    seen: list[tuple[str, ...]] = []
+
+    async def fake_exec(*args: str, **kwargs: object) -> _FakeProcess:
+        seen.append(args)
+        return _FakeProcess()
+
+    # Patched on the module itself: `ai` holds a reference to this same
+    # asyncio, so the stub is what its call site resolves.
+    monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_exec)
+    assert asyncio.run(ai._run("claude", "a prompt")) is not None
+    assert len(seen) == 1
+    return seen
+
+
+@pytest.mark.parametrize(
+    "flag",
+    ["--tools", "--restricted", "--permission-prompts", "--strict-mcp-config", "--setting-sources"],
+)
+def test_every_sandbox_flag_reaches_the_command_line(
+    flag: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Asserted at the call site, not on the constant.
+
+    A refactor that stops spreading SANDBOX_FLAGS would leave the constant
+    looking right and the session unsandboxed, which is the failure this
+    test exists to make impossible.
+    """
+    argv = _capture_argv(monkeypatch)[0]
+    assert flag in argv
+
+
+def test_the_tool_set_is_emptied_and_prompts_are_denied(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The flags carry values, and the values are the point."""
+    argv = list(_capture_argv(monkeypatch)[0])
+    assert argv[argv.index("--tools") + 1] == ""
+    assert argv[argv.index("--permission-prompts") + 1] == "none"
+    assert argv[argv.index("--setting-sources") + 1] == ""
+
+
+def test_the_prompt_never_reaches_argv(monkeypatch: pytest.MonkeyPatch) -> None:
+    """It carries a third party's private memories; argv is world-readable."""
+    argv = _capture_argv(monkeypatch)[0]
+    assert not any("a prompt" in part for part in argv)
